@@ -1,0 +1,4 @@
+#+TITLE: =emacs.d=
+
+My literate Emacs configuration. To install, simply install GNU Stow and run
+=stow emacs --target=$HOME= from the root directory of this repository.
