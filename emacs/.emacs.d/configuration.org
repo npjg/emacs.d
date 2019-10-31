@@ -419,6 +419,10 @@ accessible from anywhere:
     "ro"  '(org-mode-restart :which-key "restart org"))
 #+end_src
 
+Set multilingual input to Russian.
+#+begin_src emacs-lisp
+  (setq default-input-method 'russian-computer)
+#+end_src
 * Services
 ** =smartparens=
 So powerful.
