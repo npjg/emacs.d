@@ -578,10 +578,13 @@ fuzzy-searching for files anywhere.
 Use =multi-term= for login shell sessions. (If we only really want to have one
 terminal open at a time, should we really be using =multi-term=?)
 #+begin_src emacs-lisp
-  (use-package multi-term
-    :init
-    (global-set-key (kbd "C-c t") 'multi-term)
-    (setq multi-term-program-switches "--login"))
+    (use-package multi-term
+      :init
+      (global-set-key (kbd "C-c T") 'multi-term)
+      (global-set-key (kbd "C-c t") 'multi-term-dedicated-open)
+      (setq multi-term-program-switches "--login"
+            multi-term-switch-after-close nil
+            multi-term-dedicated-select-after-open-p t))
 #+end_src
 
 Let's not use =evil= in the terminal. It's distracting, and it rebinds some useful
