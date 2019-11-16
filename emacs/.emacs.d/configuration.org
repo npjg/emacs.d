@@ -388,9 +388,7 @@ to [[https://github.com/gjstein/emacs.d][Gregory Stein]] for illuminating me. Yo
 from his configuration.
 #+begin_src emacs-lisp
   (use-package general
-    :after evil
-    :init
-    (defvar npg-leader-key "<SPC>"))
+    :after evil)
 #+end_src
 
 Let's use the ThinkPad's paging keys to easily switch windows.
@@ -425,26 +423,17 @@ accessible from anywhere:
 
   (general-evil-setup)
   (general-define-key
-   :prefix npg-leader-key
    :states '(normal)
-    "" nil
-    "I" '(bh/punch-in :which-key "punch in")
-    "O" '(bh/punch-out :which-key "punch-out")
-    "dd" '(npg/mark-clocked-task-done :which-key "done")
-    "ds" '(npg/mark-clocked-task-done-new-minitask :which-key "minitask")
-    "a" '(npg/org-agenda :which-key "daily agenda")
-    "A" '(npg/org-weekly-agenda :which-key "weekly agenda")
-    "g" '(magit-status :which-key "magit")
-    "q" '(org-capture :which-key "capture")
-    "s" '(npg/org-capture-minitask :which-key "minitask")
-    "j" '(npg/org-capture-jot :which-key "jot")
-    "ee" '(npg/visit-emacs-config :which-key "emacs config")
-    "ef" '(npg/visit-linux-config :which-key "linux config")
-    "ws" '(npg/activate-sx-perspective :which-key "sx")
-    "m" '(mu4e :which-key "mu4e")
-    "f" '(find-function :which-key "find-function")
-    "rr" '(restart-emacs :which-key "restart emacs")
-    "ro"  '(org-mode-restart :which-key "restart org"))
+    "H-p" '(bh/punch-in :which-key "punch in")
+    "H-[" '(bh/punch-out :which-key "punch-out")
+    "H-d" '(npg/mark-clocked-task-done :which-key "done")
+    "H-'" '(org-capture :which-key "capture")
+    "H-\\" '(find-function :which-key "find-function")
+    "M-r" '(restart-emacs :which-key "restart emacs")
+    "H-;" '(op-launch-smart :which-key "perspective launch")
+    "H-0" '(npg/toggle-theme-location :which-key "toggle theme")
+    "H-=" '(multi-term-dedicated-open :which-key "multi-term")
+    "H-+" '(multi-term :which-key "multi-term"))
 #+end_src
 
 Set multilingual input to Russian.
@@ -952,15 +941,11 @@ Store my org files in =~/documents/org=, and derive my agenda from the proper do
 Not quite working yet; I need to understand why my leader key doesn't respond.
 #+begin_src emacs-lisp
   (general-define-key
-   :prefix npg-leader-key
    :keymaps 'org-mode-map
    :states '(normal motion)
-   "i" '(org-clock-in :which-key "clock in")
-   "o" '(org-clock-out :which-key "clock out")
-   "t" '(org-todo :which-key "todo state")
-   "ct" '(org-todo :which-key "todo state")
-   "ce" '(org-export-dispatch :which-key "org export")
-   "cp" '(org-set-property :which-key "org set property"))
+   "H-i" '(org-clock-in :which-key "clock in")
+   "H-o" '(org-clock-out :which-key "clock out")
+   "H-t" '(org-todo :which-key "todo state"))
 #+end_src
 
 ** Babel
