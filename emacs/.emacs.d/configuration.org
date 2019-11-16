@@ -24,6 +24,12 @@ Load the private configuration, setting variables and such.
   (load (concat user-emacs-directory "npg-private.el"))
 #+end_src
 
+Load my custom packages.
+#+begin_src emacs-lisp
+  (require 'org-perspective)
+  (require 'org-title-mode)
+#+end_src
+
 ** Sensible Defaults
 Use HRS's [[https://github.com/hrs/sensible-defaults.el/][sensible-defaults.el]] for common-sense settings -- such things as
 inhibiting the startup screen and clearing the scratch buffer.
@@ -907,22 +913,17 @@ Store my org files in =~/documents/org=, and derive my agenda from the proper do
 
   (setq org-index-file (npg/org-file-path "index.org")
         org-jot-file (npg/org-file-path "jot.org")
-        org-notes-file (npg/org-file-path "notes.org")
-        org-journal-file (npg/org-file-path "journal.org")
         org-caldav-inbox (npg/org-file-path "caldav.org")
         org-archive-location (concat
                               (npg/org-file-path "archive.org")
                               "::* From %s"))
 #+end_src
 
+(Add a blurb about my recommended package setup here.)
 #+begin_src emacs-lisp
   (setq org-agenda-files
         (list org-index-file
-              org-caldav-inbox
-              org-jot-file
-              org-journal-file))
-
-  (op-register-agenda-files-function org-index-file)
+              org-caldav-inbox))
 #+end_src
 
 ** Keys
