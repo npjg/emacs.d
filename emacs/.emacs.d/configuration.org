@@ -194,6 +194,28 @@ I love the unobtrusive elegance of [[https://github.com/arcticicestudio/nord-ema
     (load-theme 'nord t))
 #+end_src
 
+I use a bright built-in theme for when I am working outdoors, and I would like
+to be able to switch quickly between these themes.
+#+begin_src emacs-lisp
+  (defvar npg/inside-theme 'nord)
+  (defvar npg/outside-theme 'dichromacy)
+
+  (defun npg/toggle-theme-location ()
+    "Easily switch between an inside-friendly and outside-friendly theme."
+    (interactive)
+    (load-theme (if (memq npg/outside-theme custom-enabled-themes) npg/inside-theme npg/outside-theme)))
+#+end_src
+
+When we're switching themes, we should start from a clean slate.
+#+begin_src emacs-lisp
+
+  (defun load-theme--disable-old-theme (theme &rest args)
+    "Disable current theme before loading new one."
+    (mapcar #'disable-theme custom-enabled-themes))
+
+  (advice-add 'load-theme :before #'load-theme--disable-old-theme)
+#+end_src
+
 *** Modeline
 I want a pristine modeline, uncluttered by modetexts. Note that the window title gives =projectile= info.
 #+begin_src emacs-lisp
