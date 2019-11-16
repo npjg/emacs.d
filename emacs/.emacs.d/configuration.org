@@ -1094,6 +1094,26 @@ See, the block splitter works!
       (message "Point is not in an Org block")))
 #+end_src
 
+Let's also be able to activate this by a simple =M-RET=.
+#+begin_src emacs-lisp
+  (defun modi/org-meta-return (&optional arg)
+    "Insert a new heading or wrap a region in a table.
+
+  Calls `org-insert-heading', `org-insert-item',
+  `org-table-wrap-region', or `modi/org-split-block' depending on
+  context.  When called with an argument, unconditionally call
+  `org-insert-heading'."
+    (interactive "P")
+    (org-check-before-invisible-edit 'insert)
+    (or (run-hook-with-args-until-success 'org-metareturn-hook)
+        (call-interactively (cond (arg #'org-insert-heading)
+                                  ((org-at-table-p) #'org-table-wrap-region)
+                                  ((org-in-item-p) #'org-insert-item)
+                                  ((modi/org-in-any-block-p) #'modi/org-split-block)
+                                  (t #'org-insert-heading)))))
+  (advice-add 'org-meta-return :override #'modi/org-meta-return)
+#+end_src
+
 ** Tasks
 *** States
 I am using these [[http://doc.norang.ca/org-mode.html][task states]], with some verbiage modification.
