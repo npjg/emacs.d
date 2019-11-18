@@ -1946,6 +1946,9 @@ You can see a summary of clocking data in a column view. Let's set =org-column-v
 
 *** Continuous Clocking
 #+begin_src emacs-lisp
+  (defvar bh/keep-clock-running nil
+    "Indicate whether or not continuous clocking has been enabled.")
+
   (defun bh/clock-in-to-next (kw)
     "Switch a task from TODO to NEXT when clocking in.
   Skips capture tasks, projects, and subprojects.
