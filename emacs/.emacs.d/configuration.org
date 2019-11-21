@@ -992,6 +992,7 @@ Allow =babel= to evaluate Emacs lisp, Python, shell, dot, or Gnuplot code.
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((emacs-lisp . t)
+     (C . t)
      (python . t)
      (shell . t)
      (dot . t)
