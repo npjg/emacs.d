@@ -191,6 +191,7 @@ I love the unobtrusive elegance of [[https://github.com/arcticicestudio/nord-ema
   (use-package nord-theme
     :load-path "themes"
     :config
+    (add-to-list 'custom-safe-themes "82358261c32ebedfee2ca0f87299f74008a2e5ba5c502bde7aaa15db20ee3731")
     (load-theme 'nord t))
 #+end_src
 
