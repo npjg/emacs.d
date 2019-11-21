@@ -856,6 +856,40 @@ Let's attempt to use =texcount= with the operations.
   (add-hook 'latex-mode-hook (lambda () (define-key latex-mode-map "\C-cw" 'texcount)))
 #+end_src
 
+Let's also specify places where we don't want auto-fill mode to operate inside a
+LaTeX environment. There's nothing more irritating than a complex equation
+wrapping where you don't want. Given how many math environments versus text
+environments I use, though, it might be better to use a whitelist instead of a
+blacklist.
+#+begin_src emacs-lisp
+  (defvar npg/LaTeX-no-autofill-environments
+    '("equation" "equation*" "align" "align*" "tikzpicture")
+    "A list of LaTeX environment names in which `auto-fill-mode' should be inhibited.")
+
+  (defun npg/LaTeX-auto-fill-function ()
+    "This function checks whether point is currently inside one of
+  the LaTeX environments listed in
+  `npg/LaTeX-no-autofill-environments'. If so, it inhibits automatic
+  filling of the current paragraph."
+    (let ((do-auto-fill t)
+          (current-environment "")
+          (level 0))
+      (while (and do-auto-fill (not (string= current-environment "document")))
+        (setq level (1+ level)
+              current-environment (LaTeX-current-environment level)
+              do-auto-fill (not (member current-environment npg/LaTeX-no-autofill-environments))))
+      (when do-auto-fill
+        (do-auto-fill))))
+
+  (defun npg/LaTeX-setup-auto-fill ()
+    "This function turns on auto-fill-mode and sets the function
+  used to fill a paragraph to `npg/LaTeX-auto-fill-function'."
+    (auto-fill-mode)
+    (setq auto-fill-function 'npg/LaTeX-auto-fill-function))
+
+  (add-hook 'LaTeX-mode-hook 'npg/LaTeX-setup-auto-fill)
+#+end_src
+
 ** JSON
 =json-mode= works well for all I need, and I have a custom yasnippet for Org. We can pretty-print with =C-c C-f=.
 #+begin_src emacs-lisp
