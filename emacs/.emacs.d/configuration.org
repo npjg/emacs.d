@@ -288,6 +288,13 @@ that by default as well.
   (push 'split-window-right after-make-frame-functions)
 #+end_src
 
+Let's not have any visual or auditory indication of errors; it actually slows
+down processing.
+#+begin_src emacs-lisp
+  (setq ring-bell-function 'ignore
+        visible-bell nil)
+#+end_src
+
 ** Perspectives
 I use the [[https://github.com/nex3/perspective-el][Perspective]] library to manage all my project workspaces. You can
 have buffer lists and a window configuration narrowed to a perspective.
