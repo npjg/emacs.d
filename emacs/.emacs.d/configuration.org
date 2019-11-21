@@ -247,6 +247,12 @@ Split into two windows on startup.
   (split-window-right)
 #+end_src
 
+*** Cursor
+I don't like blinking cursors, especially when I am reading documents in Emacs.
+#+begin_src emacs-lisp
+  (blink-cursor-mode -1)
+#+end_src
+
 ** Buffers
 Always kill the current buffer with =C-x k=.
 #+begin_src emacs-lisp
