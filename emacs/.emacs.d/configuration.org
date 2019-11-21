@@ -45,6 +45,11 @@ inhibiting the startup screen and clearing the scratch buffer.
 #+end_src
 
 * Utility Functions
+First off, let's not have emacs warn us about disabled commands.
+#+begin_src emacs-lisp
+  (setq disabled-command-function nil)
+#+end_src
+
 ** Bric-a-Brac
 The doctsrings for these little guys do all the talking.
 #+begin_src emacs-lisp
