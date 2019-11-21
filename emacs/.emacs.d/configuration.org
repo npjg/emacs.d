@@ -630,6 +630,14 @@ Let's enable spell-checking for text (org, markdown) and commit messages.
       (add-hook 'git-commit-mode-hook 'flyspell-mode))
 #+end_src
 
+Why would I deal with GUI menus when I can use =ivy=?
+#+begin_src emacs-lisp
+  (use-package flyspell-correct-ivy
+    :bind ("C-M-;" . flyspell-correct-wrapper)
+    :init
+    (setq flyspell-correct-interface #'flyspell-correct-ivy))
+#+end_src
+
 *** Dictionary: Webster 1913
 I look up definitions by hitting =C-x w=, which shells out to =sdcv=. I've
 loaded that with the (beautifully lyrical) 1913 edition of Webster's dictionary,
