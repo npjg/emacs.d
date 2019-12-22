@@ -755,6 +755,7 @@ And here are my global keybindings, which play off the =<SUPER>= (Windows) key.
   (define-key global-map (kbd "s-0") 'npg/toggle-theme-location)
   (define-key global-map (kbd "s-x") 'persp-switch)
   (define-key global-map (kbd "s-z") 'persp-kill)
+  (define-key global-mao (kbd "s-r") 'npg/counsel-rhythmbox)
 #+end_src
 
 
@@ -1471,30 +1472,31 @@ in the inbox -- we have a direct link to it in the todo.
 Let's access the Rhythmbox queue from a =counsel= minibuffer.
 
 #+begin_src emacs-lisp
-  (defun counsel-rhythmbox-enqueue-song (song)
-    "Let Rhythmbox enqueue SONG."
+  (use-package helm-rhythmbox)
+
+  (defun npg/counsel-rhythmbox-enqueue-song (song)
+    "Let Rhythmbox enqueue SONG, encoded as a cons cell."
     (let ((service "org.gnome.Rhythmbox3")
           (path "/org/gnome/Rhythmbox3/PlayQueue")
           (interface "org.gnome.Rhythmbox3.PlayQueue"))
       (dbus-call-method :session service path interface
-                        "AddToQueue" (rhythmbox-song-uri song))))
+                        "AddToQueue" (helm-rhythmbox-song-uri (cdr song)))))
+
+  (defun npg/counsel-rhythmbox-play-song (song)
+    "A wrapper for the new version of `helm-rhythmbox.'"
+    (helm-rhythmbox-play-song (cdr song)))
 
   ;;;###autoload
-  (defun counsel-rhythmbox ()
+  (defun npg/counsel-rhythmbox ()
     "Choose a song from the Rhythmbox library to play or enqueue."
     (interactive)
-    (unless (require 'helm-rhythmbox nil t)
-      (error "Please install `helm-rhythmbox'"))
-    (unless rhythmbox-library
-      (helm-rhythmbox-load-library)
-      (while (null rhythmbox-library)
-        (sit-for 0.1)))
-    (ivy-read "Rhythmbox: "
-              (helm-rhythmbox-candidates)
-              :action
-              '(1
-                ("Play song" helm-rhythmbox-play-song)
-                ("Enqueue song" counsel-rhythmbox-enqueue-song))))
+    (unless (bound-and-true-p helm-rhythmbox--cache)
+      (helm-rhythmbox-load-library))
+    (message "%s" (ivy-read "Rhythmbox: "
+                            helm-rhythmbox--cache
+                            :action
+                            '(1 ("Play song" npg/counsel-rhythmbox-play-song)
+                                ("Enqueue song" npg/counsel-rhythmbox-enqueue-song)))))
 #+end_src
 
 
