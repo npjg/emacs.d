@@ -128,6 +128,7 @@ integration is to my mind so tight I will probably leave it be for some time.
 #+begin_src emacs-lisp
   (load "~/org/data/5f/fa1764-3ef8-4477-bc0b-d9ff7455ab13/org-perspective/op.el")
   (require 'org-perspective)
+  (setq org-attach-directory "/home/npgentry/org/data")
   (setq org-persp-index "/home/npgentry/org/index.org")
   (setq org-agenda-files (list org-persp-index))
   (org-persp-path-mode)
@@ -140,7 +141,8 @@ configuration.
   (setq npg/org-persp-important-paths
         '(:journal "/Personal/Jots/Days"
           :courses "/Courses"
-          :library "/Library"))
+          :library "/Library"
+          :archive "/Archive"))
 #+end_src
 
 
@@ -567,6 +569,13 @@ Also show column numbers in the modeline.
 
 #+begin_src emacs-lisp
   (setq column-number-mode t)
+#+end_src
+
+*** Archive
+#+begin_src emacs-lisp
+  (setq org-archive-location
+        (format "%s::* %%s"
+         (org-persp-entry-point (plist-get npg/org-persp-important-paths :archive))))
 #+end_src
 
 
