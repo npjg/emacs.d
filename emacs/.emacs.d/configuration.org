@@ -1672,6 +1672,7 @@ Allow =babel= to evaluate the following languages:
    'org-babel-load-languages
    '((emacs-lisp . t)
      (C . t)
+     (lilypond . t)
      (python . t)
      (shell . t)
      (dot . t)
@@ -1690,6 +1691,12 @@ Allow export to Markdown and LaTeX Beamer.
   (require 'ox-md)
   (require 'ox-beamer)
 #+END_SRC
+
+Also enable Lilypond export
+
+#+begin_src emacs-lisp
+  (require 'ob-lilypond)
+#+end_src
 
 Generate a custom export class for Turabian papers. (Yes, I did study philosophy
 at one point.)
