@@ -502,6 +502,14 @@ scratch buffer.
   (sensible-defaults/use-all-keybindings)
 #+end_src
 
+Let's also make the default font a bit smaller. The default 13-point font is
+just a bit too big for my 1920x1280 display.
+
+#+begin_src emacs-lisp
+  (set-frame-font
+     "-PfEd-DejaVu Sans Mono-normal-normal-normal-*-11-*-*-*-m-0-iso10646-1")
+#+end_src
+
 
 *** Viewports
 
@@ -764,7 +772,7 @@ And here are my global keybindings, which play off the =<SUPER>= (Windows) key.
   (define-key global-map (kbd "s-0") 'npg/toggle-theme-location)
   (define-key global-map (kbd "s-x") 'persp-switch)
   (define-key global-map (kbd "s-z") 'persp-kill)
-  (define-key global-mao (kbd "s-r") 'npg/counsel-rhythmbox)
+  (define-key global-map (kbd "s-r") 'npg/counsel-rhythmbox)
 #+end_src
 
 
@@ -1495,7 +1503,6 @@ Let's access the Rhythmbox queue from a =counsel= minibuffer.
     "A wrapper for the new version of `helm-rhythmbox.'"
     (helm-rhythmbox-play-song (cdr song)))
 
-  ;;;###autoload
   (defun npg/counsel-rhythmbox ()
     "Choose a song from the Rhythmbox library to play or enqueue."
     (interactive)
