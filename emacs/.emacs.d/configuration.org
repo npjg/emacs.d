@@ -2391,6 +2391,16 @@ I don't like autotagging when I have attachments on a task.
 #+end_src
 
 
+The newest version of =org-mode= seems to have removed the entrywise inheritance
+for attachment directories, so let's just enable this inheritance globally.
+This will help with keeping lectures and such in the right place in my ID-driven
+hierarchy.
+
+#+begin_src emacs-lisp
+  (setq org-attach-use-inheritance t)
+#+end_src
+
+
 *** Drill
 
 I use =org-drill= to maintain my vocabulary lists.
