@@ -1785,6 +1785,29 @@ These colors work well with my theme of serenity.
           ("MEET" :foreground "light green" :weight bold)))
 #+end_src
 
+Let's add a time-created stamp to each task entry to match the closure stamp
+that will be inserted. The helper function hooks into capture and the creation
+of any new heading. When =M-RET= has been called with a prefix argument, the
+property generation will be skipped.
+
+#+begin_src emacs-lisp
+  (require 'org-expiry)
+  (setq org-expiry-created-property-name "CREATED"
+        org-expiry-inactive-timestamps t)
+
+  (defun npg/task-created-insert ()
+    (unless current-prefix-arg
+      (save-excursion
+        (org-back-to-heading)
+        (org-expiry-insert-created))))
+
+  (add-hook 'org-capture-before-finalize-hook
+            #'npg/task-created-insert)
+
+  (add-hook 'org-insert-heading-hook
+            #'npg/task-created-insert)
+#+end_src
+
 Since we have defined keys for each state, we can use fast selection with =C-c
 C-t KEY=.
 
