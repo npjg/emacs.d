@@ -510,6 +510,14 @@ just a bit too big for my 1920x1280 display.
      "-PfEd-DejaVu Sans Mono-normal-normal-normal-*-11-*-*-*-m-0-iso10646-1")
 #+end_src
 
+Finally, let's enlarge the warning threshold for large files. Loading a 30 MB
+HTML file might cause trouble, for instance, but loading a large PDF with
+=pdf-view=, what I do far more often, causes no trouble at all.
+
+#+begin_src emacs-lisp
+  (setq large-file-warning-threshold 30000000)
+#+end_src
+
 
 *** Viewports
 
