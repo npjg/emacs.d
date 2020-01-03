@@ -1516,6 +1516,21 @@ Let's access the Rhythmbox queue from a =counsel= minibuffer.
 #+end_src
 
 
+** Finances
+
+Let's try out =ledger-mode= for a while, for keeping track of finances.
+
+#+begin_src emacs-lisp
+  (use-package ledger-mode
+    :ensure t
+    :init
+    (setq ledger-clear-whole-transactions 1)
+
+    :config
+    (add-to-list 'evil-emacs-state-modes 'ledger-report-mode)
+    :mode "\\.fat\\'")
+#+end_src
+
 ** Python
 
 Set up our =virtualenv= for =jedi=.
