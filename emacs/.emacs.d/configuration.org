@@ -130,8 +130,16 @@ integration is to my mind so tight I will probably leave it be for some time.
   (require 'org-perspective)
   (setq org-attach-directory "/home/npgentry/org/data")
   (setq org-persp-index "/home/npgentry/org/index.org")
-  (setq org-agenda-files (list org-persp-index))
+  (op--path-lookup-table nil t)
   (org-persp-path-mode)
+#+end_src
+
+Since all subtree files have IDs in my system, and I want to find tasks wherever
+they are, we can piggy-back from the ID subsystem.
+
+#+begin_src emacs-lisp
+  (require 'org-id)
+  (setq org-agenda-files org-id-files)
 #+end_src
 
 I also define some fundamental logical paths that will be used throughout this
@@ -139,7 +147,7 @@ configuration.
 
 #+begin_src emacs-lisp
   (setq npg/org-persp-important-paths
-        '(:journal "/Personal/Jots/Days"
+        '(:journal "/Journal/Days"
           :courses "/Courses"
           :library "/Library"
           :archive "/Archive"))
