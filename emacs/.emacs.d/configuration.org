@@ -1130,6 +1130,8 @@ within Emacs.
     (pdf-tools-install)
     (setq mouse-wheel-follow-mouse t
           pdf-view-resize-factor 1.00))
+
+  (add-hook 'pdf-view-mode-hook #'pdf-view-fit-page-to-window)
 #+end_src
 
 I like to view PDFs with the background color the same as the current theme. We
@@ -1152,6 +1154,15 @@ doesn't happen.
   (add-hook 'pdf-view-mode-hook
             (lambda ()
               (set (make-local-variable 'evil-emacs-state-cursor) (list nil))))
+#+end_src
+
+I cannot use =swiper= in PDFView buffers, so let's use the provided minor mode
+to do plain old Isearch. Let's also get back some basic =evil= functionality.
+
+#+begin_src emacs-lisp
+  (define-key pdf-view-mode-map "j" 'pdf-view-next-line-or-next-page)
+  (define-key pdf-view-mode-map "k" 'pdf-view-previous-line-or-previous-page)
+  (define-key pdf-view-mode-map (kbd "C-s") 'isearch-forward-regexp)
 #+end_src
 
 
