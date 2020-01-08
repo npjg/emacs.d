@@ -134,13 +134,6 @@ integration is to my mind so tight I will probably leave it be for some time.
   (org-persp-path-mode)
 #+end_src
 
-Since all subtree files have IDs in my system, and I want to find tasks wherever
-they are, we can piggy-back from the ID subsystem.
-
-#+begin_src emacs-lisp
-  (require 'org-id)
-  (setq org-agenda-files org-id-files)
-#+end_src
 
 I also define some fundamental logical paths that will be used throughout this
 configuration.
@@ -2189,7 +2182,7 @@ layout, but you can read that yourself, dear reader.
                                 (org-tags-match-list-sublevels nil)))
             (tags-todo "-WAIT-HOLD-DROP/!NEXT"
                        ((org-agenda-overriding-header "Next:")))
-            (tags-todo "-WAIT-HOLD-DROP/!"
+            (tags-todo "-WAIT-HOLD-DROP/!INBOX"
                        ((org-agenda-overriding-header "Active:")
                         (org-agenda-skip-function 'gs/select-projects)))
             (tags "ENDOFAGENDA"
@@ -2472,6 +2465,14 @@ I use =org-drill= to maintain my vocabulary lists.
 
 
 * Fine
+
+Since all subtree files have IDs in my system, and I want to find tasks wherever
+they are, we can piggy-back from the ID subsystem.
+
+#+begin_src emacs-lisp
+  (require 'org-id)
+  (setq org-agenda-files org-id-files)
+#+end_src
 
 We have only to define what the user should first see on opening Emacs.
 
