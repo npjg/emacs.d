@@ -1567,7 +1567,8 @@ Let's try out =ledger-mode= for a while, for keeping track of finances.
 
     :config
     (add-to-list 'evil-emacs-state-modes 'ledger-report-mode)
-    :mode "\\.fat\\'")
+    (setq ledger-report-use-native-highlighting nil)
+    :mode "\\.ledger\\'")
 #+end_src
 
 ** Python
@@ -1798,7 +1799,7 @@ Configure =org-caldav= package to point toward my ownCloud instance and main
 calendar.
 
 #+begin_src emacs-lisp
-  (let ((pom (op--physical-location "/Personal/Calendar" :enter)))
+  (let ((pom (op--physical-location "/Calendar" :enter)))
     (use-package org-caldav
       :init
       (setq org-caldav-url (npg/org-buffer-prop "REMOTE_URL" (marker-buffer pom))
@@ -1909,41 +1910,30 @@ I use this function to get today's journal file, to be used in the forthcoming
 capture template listing. If the file doesn't exist, it is created according to specification.
 
 #+begin_src emacs-lisp
-  (setq npg/org-capture-journal
-        '(:path "/Personal/Jots/Days"
-                :template "#+DATE: %s\n#+AUTHOR: %s"
-                :date "%Y-%2m-%2d"
-                :headline "[[file:%s][{%s}]]"
-                :file "%s.org"
-                :template "#+DATE: %s\n#+AUTHOR: %s"))
+  (defun npg/org-capture-journal (&optional date no-capture)
+    (let* ((loc (op--physical-location "/Journal/Days"))
+           (file (org-with-point-at loc
+                  (org-persp-create-perspective
+                   :spec (format-spec-make
+                          ?d (format-time-string "%Y-%2m-%2d" date)
+                          ?D (format-time-string "%Y-%2m-%2d %a" date)
+                          ?A (file-name-as-directory (or (org-attach-dir) ""))
+                          ?a user-full-name)
+                   :force nil
+                   :notes "%d.org"
+                   :template "#+DATE: %d\n#+AUTHOR: %a"))))
+      (set-buffer (org-cature-target-buffer file))
+      file))
+#+end_src
 
-  (defun npg/org-capture-journal ()
-    "Return today's journal file, creating it according to
-  specification and registering it in the journal database if it
-  does not already exist."
-    (interactive)
-    (let* ((path (plist-get npg/org-capture-journal :path))
-           (pom (op--physical-location path))
-           (iter (format-time-string (plist-get npg/org-capture-journal :date)))
-           (file (format (plist-get npg/org-capture-journal :file) iter)))
-      (org-with-point-at pom
-        (goto-char
-         (org-persp-create-perspective
-          nil
-          :headline
-          (format (plist-get npg/org-capture-journal :headline)
-                  (format (concat (org-entry-get nil "ATTACH_DIR") "/%s") file)
-                  (format-time-string "%Y-%m-%d %a" (current-time)) )
-          :silent t
-          :subhead t
-          :no-id t
-          :notes file
-          :template (format (plist-get npg/org-capture-journal :template)
-                            iter
-                            "Nathanael Gentry")))
-        (setq file (expand-file-name file (org-attach-dir)))
-        (save-buffer))
-      (set-buffer (org-capture-target-buffer file))))
+If I remember something I have written and want to read over it for a new
+writing, I would like to search immediately within the current perspective.
+
+#+begin_src emacs-lisp :tangle yes
+  (defun npg/search-journal (string)
+    (interactive (list (ag/read-from-minibuffer "Search")))
+    (ag string (concat (org-persp-entry-point "/Personal/Jots" t) "days")))
+
 #+end_src
 
 
@@ -1980,10 +1970,10 @@ heading in the proper project.
   (setq org-capture-templates
         `(
           ("v" "Vocabulary")
-          ("vr" "Russian Vocabulary" entry
+          ("vr" "Russian vocabulary" entry
            (file+headline ,(org-persp-entry-point "/Vocabulary/Russian") "Vocabulary")
            "* %^{Word} :drill:\n %U\n** Definition \n%^{Definition}")
-          ("ve" "English Vocabulary" entry
+          ("ve" "English vocabulary" entry
            (file+headline ,(org-persp-entry-point "/Vocabulary/English") "Vocabulary")
            "* %^{Word} :drill:\n %U\n** Definition \n%^{Definition}")
 
@@ -1997,6 +1987,10 @@ heading in the proper project.
            "* %? :OUT:\n%U\n" :clock-in t :clock-resume t)
           ("dm" "Meeting" entry (function npg/org-capture-journal)
            "* %? :MEET:\n%U\n" :clock-in t :clock-resume t)
+
+          ("f" "Financial transaction" plain
+           (file "/home/npgentry/org/data/2f/54d8a1-2855-40d7-8baf-6fbe1ee0f9b3/2f54d8a1-2855-40d7-8baf-6fbe1ee0f9b3.ledger")
+           "%(format-time-string \"%Y/%m/%d\") ! %?" :empty-lines 1)
 
           ("j" "Journal" entry (function npg/org-capture-journal)
            "\n\n* %U \n%?\n" :clock-in t :clock-resume t)
@@ -2017,49 +2011,48 @@ appropriate notes file. For information on the =scribe= style used here, see my 
 https://github.com/npjg/tex-a-tac][tex-a-tac]] project.
 
 #+begin_src emacs-lisp
-  (setq npg/org-capture-lecture
-        '(:paths ("/Courses/MATH431" "/Courses/MATH311" "/Courses/MATH422")
-                 :subtree "Lecture"
-                 :date "%Y-%2m-%2d"
-                 :headline "%s %s"
-                 :file "%s-%s%s.tex"
-                 :template "\\documentclass{scribe}
+  (defun npg/org-capture-lecture-1 (path subtree class &optional date)
+    (org-with-point-at (op--physical-location (concat (file-name-as-directory path) subtree))
+      (let ((parsed (org-element-parse-buffer)))
+        (org-persp-launch nil (org-persp-create-perspective
+         :spec (format-spec-make
+                ?s subtree
+                ?S class
+                ?d (format-time-string "%Y-%2m-%2d" date)
+                ?a (npg/org-buffer-prop "AUTHOR" nil parsed)
+                ?c (npg/org-buffer-prop "COURSE" nil parsed)
+                ?t (npg/org-buffer-prop "TERM" nil parsed)
+                ?C (npg/org-buffer-prop "TITLE" nil parsed)
+                ?i (or (org-entry-get nil "ITER" nil t) (progn (org-entry-put nil "ITER" "1") "1"))
+                ?l (npg/org-buffer-prop "LECTOR" nil parsed))
+         :force nil
+         :subhead t
+         :iter t
+         :headline "%s %i"
+         :notes "%C-%s%i.tex"
+         :template "\\documentclass{%S}
 
   \\title{}
-  \\author{%s}
-  \\course{%s}
-  \\term{%s}
+  \\author{%a}
+  \\course{%c}
+  \\term{%t}
   \\type{%s}
-  \\period{%s}
-  \\lector{%s}
-  \\date{%s}
+  \\period{%i}
+  \\lector{%l}
+  \\date{%d}
 
   \\begin{document}
   \\maketitle
 
-  \\end{document}"))
+  \\end{document}")))))
 
   (defun npg/org-capture-lecture (path)
-    (interactive (list (op--prompt nil nil (plist-get npg/org-capture-lecture :paths))))
-    (let* ((subtree (plist-get npg/org-capture-lecture :subtree))
-           (date (format-time-string (plist-get npg/org-capture-lecture :date)))
-           (pom (op--physical-location
-                 (concat (file-name-as-directory path) subtree)))
-           (iter (or (org-entry-get pom "ITER" nil t) "1")))
-      (org-with-point-at pom
-        (org-entry-put pom "ITER" (number-to-string (+ (string-to-number iter) 1)))
-        (org-persp-launch nil
-                          (org-persp-create-perspective
-                           nil
-                           :headline (format (plist-get npg/org-capture-lecture :headline) subtree iter)
-                           :subhead t
-                           :notes (format (plist-get npg/org-capture-lecture :file) (npg/org-buffer-prop "TITLE") subtree iter)
-                           :template (format (plist-get npg/org-capture-lecture :template)
-                                             (npg/org-buffer-prop "AUTHOR")
-                                             (npg/org-buffer-prop "COURSE" (marker-buffer pom))
-                                             (npg/org-buffer-prop "TERM")
-                                             subtree iter
-                                             (npg/org-buffer-prop "LECTOR") date))))))
+    (interactive (list (op--prompt nil nil (op--enumerate-subtree "/Courses"))))
+    (npg/org-capture-lecture-1 path "Lecture" "scribe"))
+
+  (defun npg/org-capture-mission (path)
+    (interactive (list (op--prompt nil nil (op--enumerate-subtree "/Courses"))))
+    (npg/org-capture-lecture-1 path "Mission" "homework"))
 #+end_src
 
 I also want to capture new books with optional fulltexts into my library so I
