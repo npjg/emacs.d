@@ -783,12 +783,21 @@ And here are my global keybindings, which play off the =<SUPER>= (Windows) key.
   (define-key global-map (kbd "s-p") 'bh/punch-in)
   (define-key global-map (kbd "s-[") 'bh/punch-out)
   (define-key global-map (kbd "s-'") 'org-capture)
-  (define-key global-map (kbd "s-\\") 'find-function)
+  (define-key global-map (kbd "s-\\") 'npg/find-function)
   (define-key global-map (kbd "s-;") 'org-persp-launch)
   (define-key global-map (kbd "s-0") 'npg/toggle-theme-location)
   (define-key global-map (kbd "s-x") 'persp-switch)
   (define-key global-map (kbd "s-z") 'persp-kill)
   (define-key global-map (kbd "s-r") 'npg/counsel-rhythmbox)
+  (define-key global-map (kbd "s-o") 'org-attach-open)
+#+end_src
+
+We create a prefix-argument version of =find-function=, useful for window management.
+
+#+begin_src emacs-lisp
+  (defun npg/find-function (arg)
+    (interactive "P")
+    (if arg (call-interactively #'find-function-other-window) (call-interactively #'find-function)))
 #+end_src
 
 
