@@ -598,6 +598,7 @@ Also show column numbers in the modeline.
   (setq column-number-mode t)
 #+end_src
 
+
 *** Archive
 #+begin_src emacs-lisp
   (setq org-archive-location
@@ -990,6 +991,7 @@ And to think of the untold hours I spent configuring C\C++ tags when I could hav
     (define-key evil-normal-state-map (kbd "M-.") 'dumb-jump-go)
     (setq dumb-jump-selector 'ivy))
 #+end_src
+
 
 
 * Epistemology
@@ -1571,6 +1573,7 @@ Let's try out =ledger-mode= for a while, for keeping track of finances.
     :mode "\\.ledger\\'")
 #+end_src
 
+
 ** Python
 
 Set up our =virtualenv= for =jedi=.
@@ -2088,6 +2091,7 @@ perspective. Thus, we easily implement a simple interface to PDF fulltexts,
 
 
 *** Refile
+
 Note that I have not yet tested refile functionality with the semantic paths of
 =org-perspective=. We can refile into the current file and the index file, up to
 3 levels deep.
@@ -2294,6 +2298,7 @@ Finally, let's remove empty agenda blocks from the display.
 
   (add-hook 'org-agenda-finalize-hook 'gs/remove-agenda-regions)
 #+end_src
+
 
 *** Clock
 
