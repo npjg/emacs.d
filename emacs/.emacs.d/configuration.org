@@ -329,16 +329,19 @@ Here's a rather clunky interface for getting keyword properties from Org
 buffers.
 
 #+begin_src emacs-lisp
-  (defun npg/org-buffer-props (property &optional buffer)
-    "Get the output of `org-element-parse-buffer' for keyword PROPERTY in BUFFER."
+  (defun npg/org-buffer-props (property &optional buffer parsed)
+    "Get the output of `org-element-parse-buffer' for keyword
+  PROPERTY in BUFFER. To save costly parses of the current buffers,
+  supply a cached call to `org-elemnet-parse-buffer' in PARSED."
     (with-current-buffer (or buffer (current-buffer))
       (org-element-map
-          (org-element-parse-buffer) 'keyword
+          (or parsed (org-element-parse-buffer)) 'keyword
         (lambda (el) (when (string-match property (org-element-property :key el)) el)))))
 
-  (defun npg/org-buffer-prop (property &optional buffer)
-    "Get the value of the keyword PROPERTY in BUFFER."
-    (or (plist-get (cadar (npg/org-buffer-props property buffer)) :value) ""))
+  (defun npg/org-buffer-prop (property &optional buffer parsed)
+    "Get the value of the keyword PROPERTY in BUFFER. Optionally
+  supply a cached buffer parse in PARSED."
+    (or (plist-get (cadar (npg/org-buffer-props property buffer parsed)) :value) ""))
 #+end_src
 
 
