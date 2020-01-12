@@ -1128,8 +1128,24 @@ within Emacs.
     (pdf-tools-install)
     (setq mouse-wheel-follow-mouse t
           pdf-view-resize-factor 1.00))
+#+end_src
 
+I don't like not being able to see whole pages at a time, and fitting the page
+to the window also resizes with the window, which I like a lot.
+
+#+begin_src emacs-lisp
   (add-hook 'pdf-view-mode-hook #'pdf-view-fit-page-to-window)
+#+end_src
+
+When I am compiling LaTeX or LilyPond, I don't want to wait around for
+=global-auto-revert-mode= to pick up the changes; this wastes precious seconds
+on every compile, and I perhaps compile more frequently than I should. Even when
+the compilation is fast, using an on-demand reversion function, with =pdf-tools=
+the window blanks for a moment, which is quite undesirable. Let's do away
+entirely with auto-reverting PDFs.
+
+#+begin_src emacs-lisp
+  (add-to-list 'global-auto-revert-ignore-modes 'pdf-view-mode)
 #+end_src
 
 I like to view PDFs with the background color the same as the current theme. We
@@ -1138,20 +1154,20 @@ colors, the cursor is visible, so we want to hide it in PDFView buffers.
 
 #+begin_src emacs-lisp
   (setq pdf-view-midnight-colors '("#d8dee9" . "#2e3440"))
-
-  (add-hook 'pdf-view-mode-hook
-            #'pdf-view-midnight-minor-mode)
+  (add-hook 'pdf-view-mode-hook #'pdf-view-midnight-minor-mode)
 #+end_src
 
 =evil= will sometimes conflict with PDFView, for instance causing a blinking
 cursor on the page border. This should have been fixed in PDFView, but I make sure it
-doesn't happen.
+doesn't happen. But first, let's define helper functions so we don't have
+lambdas in hooks.
 
 #+begin_src emacs-lisp
+  (defun npg/disable-evil-emacs-state-cursor ()
+    (set (make-local-variable 'evil-emacs-state-cursor) (list nil)))
+
   (evil-set-initial-state 'pdf-view-mode 'emacs)
-  (add-hook 'pdf-view-mode-hook
-            (lambda ()
-              (set (make-local-variable 'evil-emacs-state-cursor) (list nil))))
+  (add-hook 'pdf-view-mode-hook #'npg/disable-evil-emacs-state-cursor)
 #+end_src
 
 I cannot use =swiper= in PDFView buffers, so let's use the provided minor mode
@@ -1174,13 +1190,12 @@ Note, however, that Org also uses these settings to show PDF previews.
     :ensure auctex
     :init
     (setq TeX-auto-save t
+          TeX-save-query nil
           TeX-parse-self t
           TeX-source-correlate-method 'synctex
           TeX-correlate-start-server t
           TeX-view-program-selection '((output-pdf "pdf-tools"))
           TeX-view-program-list '(("pdf-tools" "TeX-pdf-tools-sync-view")))
-    (add-hook 'TeX-after-TeX-LaTeX-command-finished-hook
-              #'TeX-revert-document-buffer)
     (add-hook 'LaTeX-mode-hook
               #'yas-minor-mode)
     (add-hook 'LaTeX-mode-hook
@@ -1189,29 +1204,32 @@ Note, however, that Org also uses these settings to show PDF previews.
               #'outline-next-heading))
 #+end_src
 
-Let's only show the compilation buffer when we have a compile problem.
+Next, let's hook in the fast reversion function. We will only
+revert the PDF buffer when compilation succeeds, and we want to display an error
+buffer in the same window when there are any errors.
 
 #+begin_src emacs-lisp
-  (defadvice TeX-LaTeX-sentinel
-      (around mg-TeX-LaTeX-sentinel-open-output activate)
-    "Open output when there are errors."
-    ;; Run `TeX-LaTeX-sentinel' as usual.
-    ad-do-it
-    ;; Check for the presence of errors.
-    (when
-        (with-current-buffer TeX-command-buffer
-          (plist-get TeX-error-report-switches (intern (TeX-master-file))))
-      ;; If there are errors, open the output buffer.
-      (with-temp-buffer
-        (TeX-recenter-output-buffer nil))))
+  (defun npg/TeX-revert-document-buffer (file)
+    (unless (TeX-error-report-has-errors-p)
+      (TeX-revert-document-buffer file)))
+
+  (add-hook 'TeX-after-compilation-finished-functions
+            #'TeX-revert-document-buffer)
+#+end_src
+
+Let's only show the error output when we have a compile problem. We have a
+nicely-formatted report in the window where the PDF would go when we encounter
+errors.
+
+#+begin_src emacs-lisp
+  (setq TeX-error-overview-open-after-TeX-run t)
 #+end_src
 
 Let's also not keep an =./auto= directory in every single source file directory.
 
 #+begin_src emacs-lisp
-  (setq-default TeX-auto-local
-                (expand-file-name "auctex-auto"
-                                  (npg/shell-command-to-string "mktemp" "-d")))
+    (setq-default TeX-auto-local
+     (expand-file-name "auctex-auto" (npg/shell-command-to-string "mktemp" "-d")))
 #+end_src
 
 Let's attempt to use =texcount= instead of the default word counter whenever we
