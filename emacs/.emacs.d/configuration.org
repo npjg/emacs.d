@@ -598,10 +598,14 @@ Also show column numbers in the modeline.
 
 
 *** Archive
+
+Eventually, we want to automatically make an archive subhead at the end of the
+current file, if it doesn't already exist. And then we can archive stuff in each
+file. The second-level archive will be another file that we can easily spin out
+just by moveing out the archive subtree.
+
 #+begin_src emacs-lisp
-  (setq org-archive-location
-        (format "%s::* %%s"
-         (org-persp-entry-point (plist-get npg/org-persp-important-paths :archive))))
+  (setq org-archive-location "::* Archive   :ARCHIVE:")
 #+end_src
 
 
