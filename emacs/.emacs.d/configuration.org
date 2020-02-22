@@ -1105,13 +1105,17 @@ internal path of my library directory. As we will see later, I can add books to
 my reading list via ISBN and do other neat automation with =org-ref=.
 
 #+begin_src emacs-lisp
-  (let ((library-directory (org-persp-entry-point "/Library" :directory-only)))
-    (use-package org-ref
-      :init
-      (setq reftex-default-bibliography (list (expand-file-name "library.bib" library-directory))
-            org-ref-default-bibliography reftex-default-bibliography
-            org-ref-pdf-directory (list (file-name-as-directory (expand-file-name "org-ref" library-directory)))
-            org-latex-pdf-process (list "latexmk -shell-escape -bibtex -f -pdf %f"))))
+    (let ((library-directory (car (split-file-name (caar (org-tree-reverse-lookup "/Library"))))))
+      (use-package org-ref
+        :init
+        (setq org-ref-default-citation-link "cite"
+              org-ref-completion-library 'org-ref-ivy-cite
+              reftex-default-bibliography (list (expand-file-name "library.bib" library-directory))
+              org-ref-default-bibliography reftex-default-bibliography
+              org-ref-pdf-directory (file-name-as-directory (expand-file-name "org-ref" library-directory))
+              org-latex-pdf-process (list "latexmk -shell-escape -bibtex -f -pdf %f"))))
+
+    (setq org-ref-default-citation-link "cite")
 #+end_src
 
 *** Русcкий язык
