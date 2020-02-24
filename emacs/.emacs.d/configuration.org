@@ -132,12 +132,13 @@ logical-path functionality from the perspective functionality, but the
 integration is to my mind so tight I will probably leave it be for some time.
 
 #+begin_src emacs-lisp
-  (load "~/org/data/5f/fa1764-3ef8-4477-bc0b-d9ff7455ab13/org-perspective/op.el")
+  (load "~/org/data/2f/4624f3-4d4e-4f3c-bd4c-01df3c6dadc0/org-tree/org-tree.el")
+  (load "~/org/data/5f/fa1764-3ef8-4477-bc0b-d9ff7455ab13/org-perspective/org-perspective.el")
   (require 'org-perspective)
   (setq org-attach-directory "/home/npgentry/org/data")
-  (setq org-persp-index "/home/npgentry/org/index.org")
-  (op--path-lookup-table nil t)
-  (org-persp-path-mode)
+  (setq org-tree-root "/home/npgentry/org/index.org")
+  (org-tree-lookup-table)
+  (org-tree-mode)
 #+end_src
 
 
@@ -1127,6 +1128,7 @@ Cделайте Америка великого снова, товарищи!
 #+end_src
 
 
+
 ** PDF
 
 Let's initialize =pdf-tools= for full document previews. I read lots of LaTeX
@@ -1190,6 +1192,13 @@ to do plain old Isearch. Let's also get back some basic =evil= functionality.
   (define-key pdf-view-mode-map "j" 'pdf-view-next-line-or-next-page)
   (define-key pdf-view-mode-map "k" 'pdf-view-previous-line-or-previous-page)
   (define-key pdf-view-mode-map (kbd "C-s") 'isearch-forward-regexp)
+#+end_src
+
+And finally, when PDFs are attached to Org headlines, let's default to opening
+them externally.
+
+#+begin_src emacs-lisp
+  (add-to-list 'org-file-apps (cons "\\.pdf\\'" "xreader %s"))
 #+end_src
 
 
@@ -1826,7 +1835,7 @@ Configure =org-caldav= package to point toward my ownCloud instance and main
 calendar.
 
 #+begin_src emacs-lisp
-  (let ((pom (op--physical-location "/Calendar" :enter)))
+  (let ((pom (org-tree-find-olp "/Calendar")))
     (use-package org-caldav
       :init
       (setq org-caldav-url (npg/org-buffer-prop "REMOTE_URL" (marker-buffer pom))
@@ -2508,7 +2517,7 @@ they are, we can piggy-back from the ID subsystem.
 We have only to define what the user should first see on opening Emacs.
 
 #+begin_src emacs-lisp
-  (find-file org-persp-index)
+  (find-file org-tree-root)
   (org-agenda nil " ")
 
 #+end_src
