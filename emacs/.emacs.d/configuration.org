@@ -715,6 +715,13 @@ with an init time message.
 #+end_src
 
 
+Let's use XMouse even within Emacs.
+
+#+begin_src emacs-lisp
+  (setq mouse-autoselect-window t)
+#+end_src
+
+
 ** Propinquity
 
 I want to have all my functionality close at hand, closer than a friend.
