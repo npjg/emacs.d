@@ -1836,8 +1836,22 @@ at one point.)
                  ("\\chapter{%s}" . "\\chapter*{%s}")
                  ("\\section{%s}" . "\\section*{%s}")
                  ("\\subsection{%s}" . "\\subsection*{%s}")
-                 ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))
-               )
+                 ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))
+#+end_src
+
+Make =amsart= the default LaTeX class.
+
+#+begin_src emacs-lisp
+  (add-to-list 'org-latex-classes
+               '("amsart"
+                 "\\documentclass{amsart}"
+                 ("\\part{%s}" . "\\part*{%s}")
+                 ("\\chapter{%s}" . "\\chapter*{%s}")
+                 ("\\section{%s}" . "\\section*{%s}")
+                 ("\\subsection{%s}" . "\\subsection*{%s}")
+                 ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))
+
+  (setq org-latex-default-class "amsart")
 #+end_src
 
 Make sure we have the latest version of =htmlize= installed by default.
