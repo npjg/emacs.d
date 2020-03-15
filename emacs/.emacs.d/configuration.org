@@ -1909,7 +1909,7 @@ Note that states =WAIT=, =HOLD=, and =DROP= request a note upon state shift.
 
 #+begin_src emacs-lisp
   (setq org-todo-keywords
-        '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
+        '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)" "IN(i)")
           (sequence "WAIT(w@/!)" "HOLD(h@/!)" "|" "DROP(c@/!)" "MEET")))
 #+end_src
 
@@ -1920,6 +1920,7 @@ These colors work well with my theme of serenity.
         '(("TODO" :foreground "light salmon" :weight bold)
           ("NEXT" :foreground "SteelBlue1" :weight bold)
           ("DONE" :foreground "light green" :weight bold)
+          ("IN"   :foreground "olive drab" :weight bold)
           ("WAIT" :foreground "MediumOrchid1" :weight bold)
           ("HOLD" :foreground "Orchid1" :weight bold)
           ("DROP" :foreground "VioletRed1" :weight bold)
@@ -1941,9 +1942,6 @@ property generation will be skipped.
       (save-excursion
         (org-back-to-heading)
         (org-expiry-insert-created))))
-
-  (add-hook 'org-capture-before-finalize-hook
-            #'npg/task-created-insert)
 
   (add-hook 'org-insert-heading-hook
             #'npg/task-created-insert)
@@ -2043,7 +2041,8 @@ I would like to be able to capture books via ISBN.
 
 Let's open =org-capture= in insert mode.
 #+begin_src emacs-lisp
-  (add-hook 'org-capture-mode-hook 'evil-insert-state)
+  (add-hook 'org-mode-hook 'turn-on-auto-fill)
+    (add-hook 'org-capture-mode-hook 'evil-insert-state 'auto-fill-mode)
 #+end_src
 
 Define a few common tasks as capture templates.
