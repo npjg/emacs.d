@@ -1699,15 +1699,20 @@ just how useful it actually is to do everything from /one/ environment.
 #+end_src
 
 ** JSON
-=json-mode= works well for all I need, and I have a custom yasnippet for Org. We can pretty-print with =C-c C-f=.
+
+=json-mode= works well for all I need, and I have a custom yasnippet for Org. We
+can pretty-print with =C-c C-f=.
+
 #+begin_src emacs-lisp
   (use-package json-mode)
 #+end_src
 
 
 ** XML
+
 nXML modes don't seem to come with a formatter, so let's [[http://blog.bookworm.at/2007/03/pretty-print-xml-with-emacs.html][use one]] from Benjamin
 Ferrari's excellent blog.
+
 #+begin_src emacs-lisp
   (defun bf/format-xml-region (begin end)
     "Pretty format XML markup in region. You need to have nxml-mode
@@ -1723,19 +1728,15 @@ Ferrari's excellent blog.
         (backward-char) (insert "\n"))
       (indent-region begin end))
     (message "nXML formatted"))
-#+end_src
 
-And let's bind the key in nXML mode; we need to standardize a formatting key
-anyhow.
-#+begin_src emacs-lisp
-  (general-define-key
-   :keymaps 'nxml-mode-map
-   :states '(normal motion)
-   "C-c C-r f" '(bf/format-xml-region :which-key "format region"))
+  (define-key nxml-mode-map (kbd "C-c C-f") #'bf/format-xml-region)
 #+end_src
 
 
 ** YAML
+
+Yet another source block.
+
 #+begin_src emacs-lisp
   (use-package yaml-mode)
 #+end_src
