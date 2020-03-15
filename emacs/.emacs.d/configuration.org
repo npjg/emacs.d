@@ -1685,6 +1685,18 @@ Use =cmake-ide= to automate =rtags= processes in a CMake project.
     :init (cmake-ide-setup))
 #+end_src
 
+** JavaScript
+
+Lots of people have put lots of work into these Emacs packages, but I wonder
+just how useful it actually is to do everything from /one/ environment.
+
+#+begin_src emacs-lisp
+  (use-package indium
+    :init
+    (add-hook 'js-mode-hook #'indium-interaction-mode))
+
+  (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+#+end_src
 
 ** JSON
 =json-mode= works well for all I need, and I have a custom yasnippet for Org. We can pretty-print with =C-c C-f=.
