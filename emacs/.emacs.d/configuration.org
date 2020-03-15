@@ -1751,9 +1751,11 @@ Yet another source block.
 Indent headings by default, and use =yasnippet= with LaTeX snippets available.
 
 #+begin_src emacs-lisp
-  (dolist (mode-hook '(org-indent-mode yas-minor-mode))
+  (defun npg/yas-activate-latex-extra-mode ()
+    (yas-activate-extra-mode 'latex-mode))
+
+  (dolist (mode-hook '(org-indent-mode yas-minor-mode npg/yas-activate-latex-extra-mode))
     (add-hook 'org-mode-hook mode-hook))
-  (yas-activate-extra-mode 'latex-mode)
 #+end_src
 
 Enable LaTeX snippet highlighting.
