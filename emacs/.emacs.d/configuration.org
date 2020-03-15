@@ -580,12 +580,13 @@ Let's make our shallow tabs into spaces.
 I used to display line numbers globally, but that got to be too much of a pain
 when I had to picemeal disable numbers for =mu4e=, the agenda, the terminal,
 and special modes. Now, we just enable line numbers for major programming
-languages -- those that derive from =prog-mode=. This doesn't include LaTeX, but
-that's okay.
+languages -- those that derive from =prog-mode=. I can then whitelist the other
+major modes that should have line numbers -- mostly markup languages like LaTeX
+and LilyPond.
 
 #+begin_src emacs-lisp
   (dolist (lines-mode
-           '(prog-mode-hook))
+           '(prog-mode-hook LaTeX-mode-hook LilyPond-mode-hook))
     (add-hook lines-mode #'display-line-numbers-mode))
 #+end_src
 
