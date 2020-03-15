@@ -515,6 +515,17 @@ HTML file might cause trouble, for instance, but loading a large PDF with
   (setq large-file-warning-threshold 30000000)
 #+end_src
 
+When I started using Anaconda, Emacs at first still tried to use the system's
+Python because the updates weren't in =exec-path=. Let's keep Emacs' paths in
+sync with the system's.
+
+#+begin_src emacs-lisp
+  (use-package exec-path-from-shell
+    :init
+    (when (memq window-system '(mac ns x))
+    (exec-path-from-shell-initialize)))
+#+end_src
+
 
 *** Viewports
 
