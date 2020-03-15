@@ -49,8 +49,17 @@ I manage all my work in =org-mode=. Let's ensure we're using the latest released
 version with contributions. The included keybindings are fallbacks in case the
 =evil= keymaps don't work properly.
 
-I have written [[https://github.com/npjg/org-title-mode][=org-title-mode=]], a little minor-mode for =org-mode=, that changes the buffer name to
-the title of the Org document.
+I have written [[https://github.com/npjg/org-title-mode][=org-title-mode=]], a little minor-mode for =org-mode=, that
+changes the buffer name to the title of the Org document.
+
+This package depends on a nice buffer-global keyword property API that I have
+written, so we import that first.
+
+#+begin_src emacs-lisp
+  (load "/home/npgentry/org/data/e2/efd81a-556f-48c2-a614-c3b56c8c595e/org-global-props/org-global-props.el")
+  (require 'org-global-props)
+#+end_src
+
 
 #+begin_src emacs-lisp
   (load "/home/npgentry/org/data/a8/e760d1-a2e6-445b-adb5-d6eba2825cb1/org-title-mode/org-title-mode.el")
@@ -320,28 +329,6 @@ Let's add an option to remove a trailing newline from shell output.
     (replace-regexp-in-string "\n\\'" ""
                               (shell-command-to-string (mapconcat 'identity command " "))))
 
-#+end_src
-
-
-** Access Keyword Property
-
-Here's a rather clunky interface for getting keyword properties from Org
-buffers.
-
-#+begin_src emacs-lisp
-  (defun npg/org-buffer-props (property &optional buffer parsed)
-    "Get the output of `org-element-parse-buffer' for keyword
-  PROPERTY in BUFFER. To save costly parses of the current buffers,
-  supply a cached call to `org-elemnet-parse-buffer' in PARSED."
-    (with-current-buffer (or buffer (current-buffer))
-      (org-element-map
-          (or parsed (org-element-parse-buffer)) 'keyword
-        (lambda (el) (when (string-match property (org-element-property :key el)) el)))))
-
-  (defun npg/org-buffer-prop (property &optional buffer parsed)
-    "Get the value of the keyword PROPERTY in BUFFER. Optionally
-  supply a cached buffer parse in PARSED."
-    (or (plist-get (cadar (npg/org-buffer-props property buffer parsed)) :value) ""))
 #+end_src
 
 
@@ -1721,6 +1708,7 @@ anyhow.
 
 *** Edit & Export
 
+
 Indent headings by default, and use =yasnippet= with LaTeX snippets available.
 
 #+begin_src emacs-lisp
@@ -1845,8 +1833,8 @@ calendar.
   (let ((pom (org-tree-find-olp "/Calendar")))
     (use-package org-caldav
       :init
-      (setq org-caldav-url (npg/org-buffer-prop "REMOTE_URL" (marker-buffer pom))
-            org-caldav-calendar-id (npg/org-buffer-prop "REMOTE_ID" (marker-buffer pom)))))
+      (setq org-caldav-url (org-global-prop-get "REMOTE_URL" (marker-buffer pom))
+            org-caldav-calendar-id (org-global-prop-get "REMOTE_ID" (marker-buffer pom)))))
 #+end_src
 
 Sync the calendar each time we start Emacs, using the latest TLS version.
