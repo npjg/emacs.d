@@ -879,7 +879,7 @@ I use auto-insert to create new code files easily.
 #+begin_src emacs-lisp
   (defun npg/autoinsert-yas-expand ()
     (yas-expand-snippet (buffer-string) (point-min) (point-max))
-    (when (and (boundp 'evil-mode) evil-mode) (call-interactively (evil-insert))))
+    (when (and (boundp 'evil-mode) evil-mode) (call-interactively #'evil-insert)))
 
   (use-package autoinsert
       :config
