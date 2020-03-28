@@ -808,6 +808,7 @@ And here are my global keybindings, which play off the =<SUPER>= (Windows) key.
   (define-key global-map (kbd "s-z") 'persp-kill)
   (define-key global-map (kbd "s-r") 'npg/counsel-rhythmbox)
   (define-key global-map (kbd "s-o") 'org-attach-open)
+  (define-key global-map (kbd "C-h y") 'yas-describe-tables)
 #+end_src
 
 We create a prefix-argument version of =find-function=, useful for window management.
@@ -871,6 +872,24 @@ ways in which I am not yet one with the editor.
     :init (yas-global-mode 1))
 #+end_src
 
+** Auto-Insert
+
+I use auto-insert to create new code files easily.
+
+#+begin_src emacs-lisp
+  (defun npg/autoinsert-yas-expand ()
+    (yas-expand-snippet (buffer-string) (point-min) (point-max))
+    (when (and (boundp 'evil-mode) evil-mode) (call-interactively (evil-insert))))
+
+  (use-package autoinsert
+      :config
+      (setq auto-insert-directory "~/.emacs.d/auto-insert/")
+      (setq auto-insert-query nil
+            auto-insert-alist nil)
+      (auto-insert-mode 1)
+      (add-hook 'find-file-hook 'auto-insert)
+      (define-auto-insert "\\.tex$" ["latex-auto-insert" npg/autoinsert-yas-expand]))
+#+end_src
 
 ** Bookmark+
 
