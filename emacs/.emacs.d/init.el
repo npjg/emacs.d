@@ -4,6 +4,7 @@
 (toggle-debug-on-error)
 
 (require 'package)
+(require 'url)
 (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
 (dolist (repo '(("melpa" . "https://melpa.org/packages/")
                 ("org" . "https://orgmode.org/elpa/")))
@@ -57,6 +58,7 @@
       browse-url-generic-program "firefox"
       display-time-default-load-average nil
       display-time-24hr-format t
+      save-abbrevs 'silently
       column-number-mode t)
 (setq-default tab-width 2
               indent-tabs-mode nil)
@@ -199,7 +201,8 @@ and remove a trailing newline from the output."
 
           helm-echo-input-in-header-line t
 
-          ;; helm-candidate-number-limit 500 ; limit the number of displayed canidates
+          helm-candidate-number-limit 500 ; limit the number of displayed canidates
+          helm-ff-skip-boring-files t
           helm-ff-file-name-history-use-recentf t
           helm-move-to-line-cycle-in-source t ; move to end or beginning of source when reaching top or bottom of source.
           helm-buffer-skip-remote-checking t
@@ -230,6 +233,7 @@ and remove a trailing newline from the output."
     (global-set-key (kbd "C-h SPC") 'helm-all-mark-rings)
     (global-set-key (kbd "C-c h o") 'helm-occur)
     (global-set-key (kbd "C-c h o") 'helm-occur)
+    (global-set-key (kbd "C-x f") 'helm-for-files)
 
     (global-set-key (kbd "C-c h w") 'helm-wikipedia-suggest)
     (global-set-key (kbd "C-c h g") 'helm-google-suggest)
@@ -691,6 +695,7 @@ it in the current window."
 
 (use-package tex-site
   :ensure auctex
+  :ensure bibtex
   :init
   (defvar npg/LaTeX-no-autofill-environments
     '("equation" "equation*" "align" "align*" "tikzpicture")
@@ -738,9 +743,11 @@ used to fill a paragraph to `npg/LaTeX-auto-fill-function'."
         TeX-source-correlate-method 'synctex
         TeX-correlate-start-server t
         reftex-plug-into-AUCTeX t
+        bibtex-dialect 'biblatex
         TeX-view-program-selection '((output-pdf "pdf-tools"))
         TeX-view-program-list '(("pdf-tools" "TeX-pdf-tools-sync-view"))
         bibtex-dialect 'biblatex)
+  (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
   (add-hook 'TeX-after-compilation-finished-functions
             #'TeX-revert-document-buffer)
   (add-hook 'LaTeX-mode-hook
