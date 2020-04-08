@@ -1,5 +1,22 @@
-;; Emacs Configuration.
-;; Nathanael Gentry.
+;;; init.el --- switch between named "perspectives" of the editor
+
+;; Copyright (C) 2019-2020 Nathanael Gentry <nathanael.gentrydb8@gmail.com>
+;;
+;; Licensed under the same terms as Emacs and under the MIT license.
+
+;; Author: Nathanael Gentry <nathanael.gentrydb8@gmail.com>
+;; URL: https://github.com/npjg/emacs.d
+;; Package-Requires: ((emacs "24.4") (cl-lib "0.5"))
+;; Version: 2.7
+;; Created: 2019-
+;; By: Nathanael Gentry <nathanael.gentrydb8@gmail.com>
+;; Keywords: workspace, convenience, frames
+
+;;; Commentary:
+
+;; This file contains all of my Emacs initalization code.
+
+;;; Code:
 
 (toggle-debug-on-error)
 
@@ -25,13 +42,16 @@
 (setq user-full-name "Nathanael Gentry"
       user-mail-address "nathanael.gentrydb8@gmail.com")
 
-(require 'url)
-(setq-local sensible-defaults-loc (concat user-emacs-directory "defaults.el"))
-(if (not (file-exists-p sensible-defaults-loc))
-    (url-copy-file "https://raw.githubusercontent.com/hrs/sensible-defaults.el/master/sensible-defaults.el"
-                   sensible-defaults-loc))
+(defun npg/require-and-maybe-download (file url &optional feature default-directory)
+  (let* ((default-directory (or default-directory user-emacs-directory))
+	 (file (expand-file-name file default-directory)))
+    (unless  (file-exists-p file)
+      (url-copy-file url file))
+    (if feature
+	(require feature file)
+      (load file))))
 
-(load-file sensible-defaults-loc)
+(npg/require-and-maybe-download "defaults.el" "https://raw.githubusercontent.com/hrs/sensible-defaults.el/master/sensible-defaults.el")
 (sensible-defaults/use-all-settings)
 (sensible-defaults/use-all-keybindings)
 
@@ -294,7 +314,9 @@ and remove a trailing newline from the output."
       :init
       (helm-projectile-on)
       (setq projectile-completion-system 'helm)
-      (setq projectile-indexing-method 'alien))))
+      (setq projectile-indexing-method 'alien))
+
+    (use-package helm-org-rifle)))
 
 (use-package helm-gtags
   :init
@@ -328,8 +350,14 @@ and remove a trailing newline from the output."
       (define-key helm-gtags-mode-map (kbd "C-c <") 'helm-gtags-previous-history)
       (define-key helm-gtags-mode-map (kbd "C-c >") 'helm-gtags-next-history))))
 
+(use-package which-key
+  :init
+  (which-key-mode)
+  (setq which-key-idle-delay 0.2))
+
 (use-package perspective
   :init
+  (npg/require-and-maybe-download "helm-perspective.el"                   "https://github.com/dzop/helm-perspective/blob/master/helm-perspective.el" 'helm-perspective)
   (setq persp-show-modestring nil
         persp-initial-frame-name "/")
   (defun persp-add-and-switch-to-buffer (buffer)
@@ -356,9 +384,13 @@ it in the current window."
   (setq org-tree-root "/home/npgentry/org/index.org")
   (require 'ox-md)
   (require 'ox-beamer)
+  (require 'org-expiry)
   (require 'org-global-props "/home/npgentry/org/data/e2/efd81a-556f-48c2-a614-c3b56c8c595e/org-global-props/org-global-props.el")
   (require 'org-title-mode "/home/npgentry/org/data/a8/e760d1-a2e6-445b-adb5-d6eba2825cb1/org-title-mode/org-title-mode.el")
   (require 'org-tree "~/org/data/2f/4624f3-4d4e-4f3c-bd4c-01df3c6dadc0/org-tree/org-tree.el")
+  (require 'org-tree-capture "~/org/data/2f/4624f3-4d4e-4f3c-bd4c-01df3c6dadc0/org-tree/org-tree-capture.el")
+  (require 'org-tree-magit "~/org/data/2f/4624f3-4d4e-4f3c-bd4c-01df3c6dadc0/org-tree/org-tree-magit.el")
+    (require 'org-tree-refile "~/org/data/2f/4624f3-4d4e-4f3c-bd4c-01df3c6dadc0/org-tree/org-tree-refile.el")
  (require 'org-perspective "~/org/data/5f/fa1764-3ef8-4477-bc0b-d9ff7455ab13/org-perspective/org-perspective.el")
  (org-tree-lookup-table)
  (org-tree-mode)
@@ -375,6 +407,12 @@ it in the current window."
   (add-to-list 'org-modules 'org-expiry)
   (advice-add 'org-agenda-redo :after 'org-save-all-org-buffers)
   (advice-add 'org-meta-return :override #'modi/org-meta-return)
+  (defun npg/org-end-of-meta-data (arg)
+    "An interactive call to `org-end-of-meta-data', with
+supported prefix argument."
+    (interactive "P")
+    (org-end-of-meta-data arg))
+  (define-key org-mode-map (kbd "M-n") #'npg/org-end-of-meta-data)
   (defun npg/task-created-insert ()
     (unless current-prefix-arg
       (save-excursion
@@ -389,7 +427,7 @@ it in the current window."
    'org-babel-load-languages
    '((emacs-lisp . t)
      (C . t)
-     ;;(R. t)
+     (R . t)
      (lilypond . t)
      (python . t)
      (shell . t)
@@ -497,6 +535,9 @@ it in the current window."
           ("dm" "Meeting" entry  (olp "/Journal/Days")
            "* %? :MEET:\n%U\n" :clock-in t :clock-resume t)
 
+          ("c" "Configs")
+          ("ce" "Emacs" plain (file "~/.emacs.d/init.el")  "" :unnarrowed t)
+
           ("f" "Financial transaction")
           ("ff" "Blank transaction" plain
            (olp+attach file "/Finances" "2f54d8a1-2855-40d7-8baf-6fbe1ee0f9b3.ledger")
@@ -585,6 +626,7 @@ it in the current window."
   :bind ("M-/" . company-complete-common)
   :init (global-company-mode 1)
   (delete 'company-semantic company-backends)
+  (setq company-idle-delay 0.2)
   :config (add-to-list 'company-backends 'company-math-symbols-unicode))
 
 (use-package company-quickhelp
@@ -595,7 +637,8 @@ it in the current window."
 (use-package magit
   :bind ("C-x g" . magit-status)
   :config
-  (setq magit-push-always-verify nil
+  (setq undo-tree-visualizer-diff t
+        magit-push-always-verify nil
         git-commit-summary-max-length 50)
   (with-eval-after-load 'magit-remote
     (magit-define-popup-action 'magit-push-popup ?P
@@ -617,9 +660,17 @@ it in the current window."
          ("RET" .   newline-and-indent)))
 
 (use-package rainbow-delimiters
-  :init (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
+  :init (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
+  :config
+  (set-face-attribute 'rainbow-delimiters-unmatched-face nil
+                      :foreground "red"
+                      :inherit 'error
+                      :box t))
 
-(use-package smartparens
+(use-package elisp-refs)
+
+(use-package smartparens-config
+  :ensure smartparens
   :bind (:map smartparens-mode-map
               ("C-M-f" . sp-next-sexp)
               ("C-M-b" . sp-backward-sexp)
@@ -642,10 +693,14 @@ it in the current window."
               ("C-S-<left>" . sp-backward-slurp-sexp)
               ("C-S-<right>" . sp-backward-barf-sexp))
   :init
-  (setq sp-cancel-autoskip-on-backward-movement nil)
+  (require 'smartparens-latex)
+  (setq sp-cancel-autoskip-on-backward-movement nil
+        smartparens-strict-mode t)
 
-  :config
-  (require 'smartparens-config))
+  :config (show-smartparens-global-mode t)
+  (add-hook 'prog-mode-hook 'turn-on-smartparens-strict-mode)
+  (add-hook 'LaTeX-mode-hook 'turn-on-smartparens-strict-mode)
+  (add-hook 'markdown-mode-hook 'turn-on-smartparens-strict-mode))
 
 (use-package autoinsert
   :config
@@ -679,6 +734,8 @@ it in the current window."
   ("C-c C-g" . pdf-sync-forward-search)
   :init
   (pdf-tools-install)
+  :config
+  (add-hook 'pdf-view-mode-hook #'pdf-view-themed-minor-mode)
   (define-key pdf-view-mode-map (kbd "C-s") 'isearch-forward-regexp)
   (setq mouse-wheel-follow-mouse t
         pdf-view-resize-factor 1.00))
@@ -696,6 +753,7 @@ it in the current window."
 (use-package tex-site
   :ensure auctex
   :ensure bibtex
+  :ensure cdlatex
   :init
   (defvar npg/LaTeX-no-autofill-environments
     '("equation" "equation*" "align" "align*" "tikzpicture")
@@ -756,6 +814,8 @@ used to fill a paragraph to `npg/LaTeX-auto-fill-function'."
             #'outline-minor-mode)
   (add-hook 'LaTeX-mode-hook
             #'outline-next-heading)
+  (add-hook 'LaTeX-mode-hook
+            #'turn-on-cdlatex)
   (add-hook 'LaTeX-mode-hook 'npg/LaTeX-setup-auto-fill)
   (add-hook 'LaTeX-mode-hook (lambda () (define-key
   LaTeX-mode-map "\M-=" 'npg/texcount-words))))
@@ -846,7 +906,9 @@ by using nxml's indentation rules."
 
 (use-package undo-tree
   :init
-  (global-undo-tree-mode 1))
+  (global-undo-tree-mode 1)
+  (setq undo-tree-visualizer-timestamps t
+        undo-tree-visualizer-diff t))
 
 (use-package restart-emacs
   :bind ("C-x M-c" . #'restart-emacs))
