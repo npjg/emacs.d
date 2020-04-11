@@ -483,7 +483,7 @@ opening in Emacs."
                  ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))
   (setq org-indirect-buffer-display 'currrent-window
         org-attach-directory "/home/npgentry/org/data"
-        org-archive-location "::* Archive   :ARCHIVE:"
+        org-archive-location "::* Archive"
         org-src-fontify-natively t
         org-src-tab-acts-natively t
         org-confirm-babel-evaluate nil
