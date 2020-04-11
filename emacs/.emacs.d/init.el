@@ -357,7 +357,8 @@ and remove a trailing newline from the output."
 
 (use-package perspective
   :init
-  (npg/require-and-maybe-download "helm-perspective.el"                   "https://github.com/dzop/helm-perspective/blob/master/helm-perspective.el" 'helm-perspective)
+  (npg/require-and-maybe-download "helm-perspective.el"
+"https://github.com/dzop/helm-perspective/blob/master/helm-perspective.el" 'helm-perspective)
   (setq persp-show-modestring nil
         persp-initial-frame-name "/")
   (defun persp-add-and-switch-to-buffer (buffer)
@@ -391,7 +392,7 @@ it in the current window."
   (require 'org-tree-capture "~/org/data/2f/4624f3-4d4e-4f3c-bd4c-01df3c6dadc0/org-tree/org-tree-capture.el")
   (require 'org-tree-magit "~/org/data/2f/4624f3-4d4e-4f3c-bd4c-01df3c6dadc0/org-tree/org-tree-magit.el")
     (require 'org-tree-refile "~/org/data/2f/4624f3-4d4e-4f3c-bd4c-01df3c6dadc0/org-tree/org-tree-refile.el")
- (require 'org-perspective "~/org/data/5f/fa1764-3ef8-4477-bc0b-d9ff7455ab13/org-perspective/org-perspective.el")
+ (require 'org-tree-perspective "~/org/data/2f/4624f3-4d4e-4f3c-bd4c-01df3c6dadc0/org-tree/org-tree-perspective.el")
  (org-tree-lookup-table)
  (org-tree-mode)
   (dolist (mode-hook '(org-indent-mode
