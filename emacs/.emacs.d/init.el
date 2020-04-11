@@ -148,6 +148,7 @@ and remove a trailing newline from the output."
 
 (global-set-key (kbd "C-x 2") 'npg/split-window-below-and-switch)
 (global-set-key (kbd "C-x 3") 'npg/split-window-right-and-switch)
+(global-set-key (kbd "C-h C-u") 'find-function)
 
 (dolist (lines-mode
          '(prog-mode-hook LaTeX-mode-hook LilyPond-mode-hook))
@@ -168,6 +169,7 @@ and remove a trailing newline from the output."
     (mapcar #'disable-theme custom-enabled-themes))
   (advice-add 'load-theme :before #'npg/load-theme-and-disable-old-theme)
   :config
+  (global-set-key (kbd "C-c T") #'npg/toggle-theme-location)
   (setq npg/inside-theme 'nord
         npg/outside-theme 'dichromacy)
   (load-theme 'nord t))
@@ -742,8 +744,7 @@ supported prefix argument."
         pdf-view-resize-factor 1.00))
 
 (use-package multi-term
-  :bind (("C-c t" . multi-term)
-  ("C-c T" . multi-term-dedicated-open))
+  :bind (("C-c t" . multi-term))
   :config
   (setq multi-term-program-switches "--login"
         multi-term-switch-after-close nil
