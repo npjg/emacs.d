@@ -436,6 +436,18 @@ supported prefix argument."
       (save-excursion
         (org-back-to-heading)
         (org-expiry-insert-created))))
+  (defun npg/org-attach-open (&optional in-emacs)
+  "Open all attachements of the current outline node, rather than
+presenting a list as `org-attach-open' does. With IN-EMACS, force
+opening in Emacs."
+  (let ((ad (org-attach-dir))
+        (am (split-string (if (and loose ad) (org-attach-file-list ad)
+                            (or (org-entry-get nil "ATTACHMENTS") "")))))
+    (mapc (lambda (a)
+            (let ((path (expand-file-name a ad)))
+              ;;(org-attach-annex-get-maybe path)
+              (org-open-file path in-emacs)))
+          am)))
   (add-hook 'org-insert-heading-hook
             #'npg/task-created-insert)
   :bind (("\C-c a" . org-agenda)
