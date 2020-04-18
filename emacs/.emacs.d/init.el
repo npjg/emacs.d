@@ -85,8 +85,6 @@
 (push 'split-window-right after-make-frame-functions)
 (add-hook 'eww-mode-hook 'hl-line-mode)
 
-(add-hook 'find-function-after-hook 'view-mode)
-
 (defadvice find-function-search-for-symbol (after
 view-function-source last (symbol type library) activate)
   "When visiting function source via Help, switch to view-mode"
