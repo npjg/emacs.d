@@ -81,7 +81,7 @@
       save-abbrevs 'silently
       column-number-mode t)
 (setq-default tab-width 2
-              indent-tabs-mode nil)
+              indent-tabs-mode t)
 (push 'split-window-right after-make-frame-functions)
 (add-hook 'eww-mode-hook 'hl-line-mode)
 
@@ -438,8 +438,8 @@ supported prefix argument."
   "Open all attachements of the current outline node, rather than
 presenting a list as `org-attach-open' does. With IN-EMACS, force
 opening in Emacs."
-  (let ((ad (org-attach-dir))
-        (am (split-string (if (and loose ad) (org-attach-file-list ad)
+  (let* ((ad (org-attach-dir))
+        (am (split-string (if ad (org-attach-file-list ad)
                             (or (org-entry-get nil "ATTACHMENTS") "")))))
     (mapc (lambda (a)
             (let ((path (expand-file-name a ad)))
@@ -554,8 +554,6 @@ opening in Emacs."
 
           ("t" "Todo" entry (file+headline org-tree-root "INBOX")
            "* TODO %?\n%U\n" :clock-in t :clock-resume t)
-          ("n" "Next" entry (file+headline org-tree-root "INBOX")
-           "* NEXT %?\nDEADLINE: %t\n%U\n%a\n" :immediate-finish t)
 
           ("d" "Diversions")
           ("do" "Out" entry (olp "/Journal/Days")
@@ -660,6 +658,8 @@ opening in Emacs."
 (use-package company-quickhelp
   :init (company-quickhelp-mode))
 
+(use-package impatient-mode)
+
 (use-package flycheck)
 
 (use-package magit
@@ -672,6 +672,12 @@ opening in Emacs."
     (magit-define-popup-action 'magit-push-popup ?P
                                'magit-push-implicitly--desc
                                'magit-push-implicitly ?p t)))
+
+(use-package forge
+  :after magit
+  :init
+  (setq forge-owned-accounts '(("npjg" . (:remote-name upstream))))
+  )
 
 (use-package ag)
 
@@ -730,14 +736,36 @@ opening in Emacs."
   (add-hook 'LaTeX-mode-hook 'turn-on-smartparens-strict-mode)
   (add-hook 'markdown-mode-hook 'turn-on-smartparens-strict-mode))
 
-(use-package autoinsert
-  :config
-  (setq auto-insert-directory "~/.emacs.d/auto-insert/"
-        auto-insert-query nil
-        auto-insert-alist nil)
-  (auto-insert-mode 1)
-  (add-hook 'find-file-hook 'auto-insert)
-  (define-auto-insert "\\.tex$" ["latex-auto-insert" npg/autoinsert-yas-expand]))
+;; (use-package autoinsert
+;;   :init
+;;   (defun npg/autoinsert-yas-expand ()
+;;   "Call `yas-expand-snippet' on the whole buffer. Provides
+;; interactivity for `autoinsert' templates."
+;;   (yas-expand-snippet (buffer-string) (point-min) (point-max)))
+;;   :config
+
+;;   (setq auto-insert-directory "~/.emacs.d/auto-insert/"
+;;         auto-insert-query nil
+;;         ;;auto-insert-alist nil
+;;         )
+;;   (auto-insert-mode 1)
+;;   (add-hook 'find-file-hook 'auto-insert)
+;;   (define-auto-insert "\\.tex$"
+;;     "\\documentclass{amsart}
+;; \\usepackage{npjg}
+
+;; \\title{${1:title}}
+;; \\author{Nathanael Gentry}
+;; \\date{${2:`(shell-command-to-string "echo -n $(date +%Y-%m-%d)")`}}
+
+;; \\begin{document}
+;; \\maketitle
+
+;; \\section{Introduction}
+;; $0
+
+;; \\end{document}")
+;;   (define-auto-insert "\\.tex$" ["latex-auto-insert" npg/autoinsert-yas-expand]))
 
 (use-package yasnippet
   :init (yas-global-mode 1)
@@ -767,6 +795,21 @@ opening in Emacs."
   (define-key pdf-view-mode-map (kbd "C-s") 'isearch-forward-regexp)
   (setq mouse-wheel-follow-mouse t
         pdf-view-resize-factor 1.00))
+
+(use-package ein
+
+  )
+
+;; Require flycheck to be present
+(use-package flycheck
+  :ensure flycheck-pyflakes
+  :init
+  ;; Force flycheck to always use c++11 support. We use
+  ;; the clang language backend so this is set to clang
+  (add-hook 'c++-mode-hook
+            (lambda () (setq flycheck-clang-language-standard "c++11")))
+  ;; Turn flycheck on everywhere
+  (global-flycheck-mode))
 
 (use-package multi-term
   :bind (("C-c t" . multi-term))
@@ -877,6 +920,8 @@ used to fill a paragraph to `npg/LaTeX-auto-fill-function'."
 (progn
   (require 'cc-mode)
   (require 'semantic)
+
+  (global-set-key (kbd "C-x C-o") 'ff-find-other-file)
 
   (global-semanticdb-minor-mode 1)
   (global-semantic-idle-scheduler-mode 1)
@@ -1033,11 +1078,23 @@ context.  When called with an argument, unconditionally call
 
 (define-key global-map (kbd "C-x M-f") #'npg-find-function)
 
-(defun npg/autoinsert-yas-expand ()
-  "Call `yas-expand-snippet' on the whole buffer. Provides
-interactivitiy for `autoinsert' templates."
-  (yas-expand-snippet (buffer-string) (point-min) (point-max))
-  (when (and (boundp 'evil-mode) evil-mode) (call-interactively #'evil-insert)))
+(defun jy/rename-current-buffer-file (&optional new-name)
+  "Renames current buffer and file it is visiting."
+  (interactive)
+  (let* ((name (buffer-name))
+        (filename (buffer-file-name))
+        (basename (file-name-nondirectory filename)))
+    (if (not (and filename (file-exists-p filename)))
+        (error "Buffer '%s' is not visiting a file!" name)
+      (let ((new-name (or new-name (read-file-name "New name: " (file-name-directory filename) basename nil basename))))
+        (if (get-buffer new-name)
+            (error "A buffer named '%s' already exists!" new-name)
+          (rename-file filename new-name 1)
+          (rename-buffer new-name)
+          (set-visited-file-name new-name)
+          (set-buffer-modified-p nil)
+          (message "File '%s' successfully renamed to '%s'"
+                   name (file-name-nondirectory new-name)))))))
 
 (defun hrs/region-or-word ()
   (if mark-active
@@ -1147,7 +1204,6 @@ interactivitiy for `autoinsert' templates."
         (if (< (- (region-end) (region-beginning)) 5) (setq region-large nil)
           (if (< (count-lines (region-beginning) (region-end)) 4)
               (delete-region (region-beginning) (region-end))))))))
-
 
 (find-file org-tree-root)
 ;; (org-agenda nil " ")
