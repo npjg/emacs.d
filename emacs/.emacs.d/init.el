@@ -122,11 +122,18 @@ last (variable &optional file) activate)
                                           newline-mark))
                             (whitespace-mode 1)))
 
-(defun npg/set-frame-font (&optional frame)
-  (with-selected-frame (or frame (selected-frame))
-    (set-frame-font "-PfEd-DejaVu Sans Mono-normal-normal-normal-*-9-*-*-*-m-0-iso10646-1")))
+(defvar npg/default-font-size 9 "The default font size of each frame")
+
+(defun npg/set-frame-font (&optional frame size)
+	(interactive "i\nnFont size: ")
+	(let ((size (or size npg/default-font-size)))
+		(with-selected-frame (or frame (selected-frame))
+			(set-frame-font (format "-PfEd-DejaVu Sans Mono-normal-normal-normal-*-%d-*-*-*-m-0-iso10646-1" size)))))
+
 (add-hook 'after-make-frame-functions #'npg/set-frame-font)
 (npg/set-frame-font)
+
+(global-set-key (kbd "C-h M-f") #'npg/set-frame-font)
 
 (defun hrs/opacity (value)
   "Sets the percent opacity of the frame window."
