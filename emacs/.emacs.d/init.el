@@ -671,7 +671,19 @@ opening in Emacs."
 
 (use-package magit
   :bind ("C-x g" . magit-status)
-  :config
+  :init
+	(require 'magit-popup)
+	(autoload 'org-read-date "org")
+
+	(defun magit-org-read-date (prompt &optional _default)
+		(org-read-date 'with-time nil nil prompt))
+
+	(magit-define-popup-option 'magit-log-popup
+		?s "Since date" "--since=" #'magit-org-read-date)
+
+	(magit-define-popup-option 'magit-log-popup
+		?u "Until date" "--until=" #'magit-org-read-date)
+	:config
   (setq undo-tree-visualizer-diff t
         magit-push-always-verify nil
         git-commit-summary-max-length 50)
