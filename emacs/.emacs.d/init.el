@@ -420,6 +420,13 @@ it in the current window."
   :config
   (define-key perspective-map (kbd "a") 'persp-add-and-switch-to-buffer))
 
+(require 'gateway-mode "/home/npgentry/Dropbox/org/data/ce/e8aa17-d740-4037-b5f5-67694f7a769c/gateway-mode/gateway-mode.el")
+(setq gateway-inhibit-crossrefs t
+			gateway-inhibit-footnotes t
+			gateway-inhibit-headings t
+			gateway-inhibit-versenums t
+			gateway-version "ESV")
+
 (use-package org
   :ensure org-plus-contrib
   :init
