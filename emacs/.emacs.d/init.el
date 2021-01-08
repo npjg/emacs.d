@@ -80,16 +80,35 @@
       display-time-24hr-format t
       save-abbrevs 'silently
       column-number-mode t)
+
 (setq-default tab-width 2
               indent-tabs-mode t)
+
 (push 'split-window-right after-make-frame-functions)
 (add-hook 'eww-mode-hook 'hl-line-mode)
+
+(defun my/eww-toggle-images ()
+  "Toggle whether images are loaded and reload the current page fro cache."
+  (interactive)
+  (setq-local shr-inhibit-images (not shr-inhibit-images))
+  (eww-reload t)
+  (message "Images are now %s"
+           (if shr-inhibit-images "off" "on")))
+
+;; (define-key eww-mode-map (kbd "I") #'my/eww-toggle-images)
+;; (define-key eww-link-keymap (kbd "I") #'my/eww-toggle-images)
+
+;; minimal rendering by default
+(setq-default shr-inhibit-images t)   ; toggle with `I`
+(setq-default shr-use-fonts nil)      ; toggle with `F`
 
 (defadvice find-function-search-for-symbol (after
 view-function-source last (symbol type library) activate)
   "When visiting function source via Help, switch to view-mode"
   (with-current-buffer (car ad-return-value)
     (view-mode 1)))
+
+(add-hook 'eww-after-render-hook 'eww-readable)
 
 (defadvice find-variable-noselect (after view-var-source
 last (variable &optional file) activate)
