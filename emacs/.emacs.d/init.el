@@ -79,7 +79,9 @@
       display-time-default-load-average nil
       display-time-24hr-format t
       save-abbrevs 'silently
-      column-number-mode t)
+      column-number-mode t
+			gdb-many-windows t
+			gdb-show-main t)
 
 (setq-default tab-width 2
               indent-tabs-mode t)
@@ -117,15 +119,7 @@ last (variable &optional file) activate)
     (view-mode 1)))
 
 (display-time-mode)
-
-(global-set-key (kbd "<f5>") (lambda ()
-                               (interactive)
-                               (setq-local compilation-read-command nil)
-                               (call-interactively 'compile)))
 (global-set-key (kbd "C-c w") 'whitespace-mode)
-
-(setq gdb-many-windows t
-      gdb-show-main t)
 
 (add-hook 'diff-mode-hook (lambda ()
                             (setq-local whitespace-style
@@ -141,7 +135,7 @@ last (variable &optional file) activate)
                                           newline-mark))
                             (whitespace-mode 1)))
 
-(defvar npg/default-font-size 9 "The default font size of each frame")
+(defvar npg/default-font-size 9 "The default font size of each frame.")
 
 (defun npg/set-frame-font (&optional frame size)
 	(interactive "i\nnFont size: ")
@@ -168,8 +162,7 @@ last (variable &optional file) activate)
   "Call a shell command with args in COMMAND separated by spaces,
 and remove a trailing newline from the output."
   (replace-regexp-in-string "\n\\'" ""
-                            (shell-command-to-string (mapconcat
-                                                      'identity command " "))))
+														(shell-command-to-string (mapconcat 'identity command " "))))
 
 (defun npg/split-window-below-and-switch ()
   "Split the window horizontally, then switch to the new pane."
@@ -201,8 +194,9 @@ and remove a trailing newline from the output."
   (defun npg/toggle-theme-location ()
     "Easily switch between an inside-friendly and outside-friendly theme."
     (interactive)
-    (load-theme (if (memq npg/outside-theme
-    custom-enabled-themes) npg/inside-theme npg/outside-theme)))
+    (load-theme (if (memq npg/outside-theme custom-enabled-themes)
+										npg/inside-theme
+									npg/outside-theme)))
   (defun npg/load-theme-and-disable-old-theme (theme &rest args)
     "Disable current theme completely before loading a new one."
     (mapcar #'disable-theme custom-enabled-themes))
@@ -398,8 +392,7 @@ and remove a trailing newline from the output."
 
 (use-package perspective
   :init
-  (npg/require-and-maybe-download "helm-perspective.el"
-"https://github.com/dzop/helm-perspective/blob/master/helm-perspective.el" 'helm-perspective)
+  (npg/require-and-maybe-download "helm-perspective.el" "https://github.com/dzop/helm-perspective/blob/master/helm-perspective.el" 'helm-perspective)
   (setq persp-show-modestring nil
         persp-initial-frame-name "/")
   (defun persp-add-and-switch-to-buffer (buffer)
@@ -439,15 +432,14 @@ it in the current window."
   (require 'org-tree "~/org/data/2f/4624f3-4d4e-4f3c-bd4c-01df3c6dadc0/org-tree/org-tree.el")
   (require 'org-tree-capture "~/org/data/2f/4624f3-4d4e-4f3c-bd4c-01df3c6dadc0/org-tree/org-tree-capture.el")
   (require 'org-tree-magit "~/org/data/2f/4624f3-4d4e-4f3c-bd4c-01df3c6dadc0/org-tree/org-tree-magit.el")
-    (require 'org-tree-refile "~/org/data/2f/4624f3-4d4e-4f3c-bd4c-01df3c6dadc0/org-tree/org-tree-refile.el")
- (require 'org-tree-perspective "~/org/data/2f/4624f3-4d4e-4f3c-bd4c-01df3c6dadc0/org-tree/org-tree-perspective.el")
+	(require 'org-tree-refile "~/org/data/2f/4624f3-4d4e-4f3c-bd4c-01df3c6dadc0/org-tree/org-tree-refile.el")
+	(require 'org-tree-perspective "~/org/data/2f/4624f3-4d4e-4f3c-bd4c-01df3c6dadc0/org-tree/org-tree-perspective.el")
  (org-tree-lookup-table)
  (org-tree-mode)
   (dolist (mode-hook '(org-indent-mode
                        yas-minor-mode
                        npg/yas-activate-latex-extra-mode
                        visual-line-mode
-                       org-indent-mode
                        turn-on-auto-fill
                        org-title-mode))
     (add-hook 'org-mode-hook mode-hook))
@@ -462,6 +454,7 @@ supported prefix argument."
     (interactive "P")
     (org-end-of-meta-data arg))
   (define-key org-mode-map (kbd "M-n") #'npg/org-end-of-meta-data)
+	(define-key org-mode-map (kbd "M-p M-RET") #'org-tree-insert-logical-subtree)
   (defun npg/task-created-insert ()
     (unless current-prefix-arg
       (save-excursion
@@ -479,10 +472,25 @@ opening in Emacs."
               ;;(org-attach-annex-get-maybe path)
               (org-open-file path in-emacs)))
           am)))
+	(defun npg/unfill-paragraph (&optional region)
+		"Takes a multi-line paragraph and makes it into a single line of text."
+		(interactive (progn (barf-if-buffer-read-only) '(t)))
+		(let ((fill-column (point-max))
+					;; This would override `fill-column' if it's an integer.
+					(emacs-lisp-docstring-fill-column t))
+			(fill-paragraph nil region)))
+	(defun npg/org-open-scripture-passage ()
+		"Opens the headline at point as a Bible Gateway passage, using
+the server-side Bible Gateway passage search functionality."
+		(interactive)
+		(gateway-fetch-passage (nth 4 (org-heading-components))))
   (add-hook 'org-insert-heading-hook
             #'npg/task-created-insert)
   :bind (("\C-c a" . org-agenda)
-         ("\C-c c" . org-capture))
+         ("\C-c c" . org-capture)
+				 ("\C-x x ;" . org-tree-persp-launch)
+				 ("\C-x \C-b" . npg/org-open-scripture-passage)
+				 ("\M-\S-q" . npg/unfill-paragraph))
   :config
   (org-babel-do-load-languages
    'org-babel-load-languages
@@ -589,9 +597,9 @@ opening in Emacs."
            "* TODO %?\n%U\n" :clock-in t :clock-resume t)
 
           ("d" "Diversions")
-          ("do" "Out" entry (olp "/Journal/Days")
+          ("do" "Out" entry (olp "/Journal/Days (2021)")
            "* %? :OUT:\n%U\n" :clock-in t :clock-resume t)
-          ("dm" "Meeting" entry  (olp "/Journal/Days")
+          ("dm" "Meeting" entry  (olp "/Journal/Days (2021)")
            "* %? :MEET:\n%U\n" :clock-in t :clock-resume t)
 
           ("c" "Configs")
@@ -602,7 +610,7 @@ opening in Emacs."
            (olp+attach file "/Finances" "2f54d8a1-2855-40d7-8baf-6fbe1ee0f9b3.ledger")
            "%(format-time-string \"%Y/%m/%d\") ! %?" :empty-lines 1)
 
-          ("j" "Journal" entry (olp "/Journal/Days")
+          ("j" "Journal" entry (olp "/Journal/Days (2021)")
            "\n\n* %U \n%?\n" :clock-in t :clock-resume t)
           ))
   (setq org-agenda-time-grid
@@ -638,7 +646,7 @@ opening in Emacs."
           (org-agenda-todo-ignore-deadlines 'near)
           (org-agenda-todo-ignore-scheduled t)))
         ("a" "Agenda"
-         ((agenda "") (alltodo))
+         ((agenda ""))
          ((org-agenda-ndays 10)
           (org-agenda-start-on-weekday nil)
           (org-agenda-start-day "-1d")
@@ -680,20 +688,18 @@ opening in Emacs."
         minions-mode-line-delimiters '("" . ""))
   (minions-mode 1))
 
-(use-package company
-  :ensure company-math
-  :bind ("M-/" . company-complete-common)
-  :init (global-company-mode 1)
-  (delete 'company-semantic company-backends)
-  (setq company-idle-delay 0.2)
-  :config (add-to-list 'company-backends 'company-math-symbols-unicode))
+;; (use-package company
+;;   :ensure company-math
+;;   :bind ("M-/" . company-complete-common)
+;;   :init (global-company-mode 1)
+;;   (delete 'company-semantic company-backends)
+;;   (setq company-idle-delay 0.2)
+;;   :config (add-to-list 'company-backends 'company-math-symbols-unicode))
 
-(use-package company-quickhelp
-  :init (company-quickhelp-mode))
+;; (use-package company-quickhelp
+;;   :init (company-quickhelp-mode))
 
 (use-package impatient-mode)
-
-(use-package flycheck)
 
 (use-package magit
   :bind ("C-x g" . magit-status)
@@ -717,12 +723,6 @@ opening in Emacs."
     (magit-define-popup-action 'magit-push-popup ?P
                                'magit-push-implicitly--desc
                                'magit-push-implicitly ?p t)))
-
-(use-package forge
-  :after magit
-  :init
-  (setq forge-owned-accounts '(("npjg" . (:remote-name upstream))))
-  )
 
 (use-package ag)
 
@@ -777,9 +777,7 @@ opening in Emacs."
         smartparens-strict-mode t)
 
   :config (show-smartparens-global-mode t)
-  (add-hook 'prog-mode-hook 'turn-on-smartparens-strict-mode)
-  (add-hook 'LaTeX-mode-hook 'turn-on-smartparens-strict-mode)
-  (add-hook 'markdown-mode-hook 'turn-on-smartparens-strict-mode))
+  (add-hook 'prog-mode-hook 'turn-on-smartparens-strict-mode))
 
 ;; (use-package autoinsert
 ;;   :init
@@ -817,12 +815,6 @@ opening in Emacs."
   (defun npg/yas-activate-latex-extra-mode ()
     (yas-activate-extra-mode 'latex-mode)))
 
-(use-package synosaurus
-  :init
-  (setq-default synosaurus-backend 'synosaurus-backend-wordnet)
-  (add-hook 'after-init-hook #'synosaurus-mode)
-  :bind ("s-S" . synosaurus-lookup))
-
 (use-package flyspell
   :config
   (add-hook 'text-mode-hook 'turn-on-auto-fill)
@@ -836,23 +828,20 @@ opening in Emacs."
   :init
   (pdf-tools-install)
   :config
-  (add-hook 'pdf-view-mode-hook #'pdf-view-themed-minor-mode)
+	(when (fboundp #'pdf-view-themed-minor-mode)
+		(add-hook 'pdf-view-mode-hook #'pdf-view-themed-minor-mode))
   (define-key pdf-view-mode-map (kbd "C-s") 'isearch-forward-regexp)
   (setq mouse-wheel-follow-mouse t
         pdf-view-resize-factor 1.00))
 
-(use-package ein
+(use-package ein)
 
-  )
-
-;; Require flycheck to be present
 (use-package flycheck
   :ensure flycheck-pyflakes
   :init
   ;; Force flycheck to always use c++11 support. We use
   ;; the clang language backend so this is set to clang
-  (add-hook 'c++-mode-hook
-            (lambda () (setq flycheck-clang-language-standard "c++11")))
+  (add-hook 'c++-mode-hook (lambda () (setq flycheck-clang-language-standard "c++11")))
   ;; Turn flycheck on everywhere
   (global-flycheck-mode))
 
@@ -883,7 +872,7 @@ opening in Emacs."
                           ((string-match "latin" enc-str) "-latin1")
                           ("-encoding=guess")))
            (word-count (shell-command-to-string
-                        (npg/join " " "texcount"  "-0" enc-opt this-file))))
+												(format "texcount -0 %s %s" enc-opt this-file))))
       (message word-count)))
   (defun npg/LaTeX-auto-fill-function ()
     "This function checks whether point is currently inside one of
@@ -1158,9 +1147,7 @@ context.  When called with an argument, unconditionally call
   (interactive)
   (let* ((word (hrs/dictionary-prompt))
          (buffer-name (concat "Definition: " word)))
-    (split-window-below)
-    (with-output-to-temp-buffer buffer-name
-      (shell-command (format "sdcv -n %s" word) buffer-name))))
+		(shell-command (format "sdcv -n %s" word) buffer-name)))
 
 (define-key global-map (kbd "C-x w-w") #'hrs/dictionary-define-word)
 
